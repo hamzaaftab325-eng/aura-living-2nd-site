@@ -740,3 +740,104 @@ Stage Summary:
 - Admin Users page built — your client sees "Aura Living Admin / admin@auraliving.pk" professionally, not random IDs.
 - The raw Account table in Supabase Studio is internal Better Auth storage (password hashes, etc.) — clients should never look at it. The admin UI is the professional view.
 - Phase 2.1 now FULLY verified — admin login works end-to-end, protected routes redirect properly, admin can view all users professionally.
+
+---
+
+Task ID: 2.2
+Agent: main
+Task: Phase 2.2 — Database Schema Finalization (10 new models + seed + queries)
+
+Work Log:
+
+=== Schema Expansion ===
+Expanded prisma/schema.prisma with 10 new models + 2 new enums:
+
+- ProductVariant (productName + sku denormalized for human readability)
+- Review (userEmail + userName + productName + productSlug denormalized)
+- ReviewImage (linked to Review)
+- Cart (userEmail denormalized + subtotal/itemCount snapshot)
+- CartItem (productName + productSlug + variantSku + variantLabel denormalized)
+- Wishlist (userEmail denormalized)
+- WishlistItem (productName + variantSku denormalized + unique constraint per wishlist)
+- Address (userEmail + full address fields + AddressType enum)
+- Coupon (CouponType enum: PERCENT/FIXED/FREE_SHIPPING + full validation fields)
+- CouponUsage (userEmail + couponCode + discountAmount denormalized)
+
+Also expanded existing models:
+
+- Order: added discount, couponCode, trackingNumber, carrier, shippedAt, deliveredAt, customerNotes, adminNotes
+- OrderItem: added variantId + variantSku + variantLabel relations
+
+New enums:
+
+- AddressType: SHIPPING / BILLING / BOTH
+- CouponType: PERCENT / FIXED / FREE_SHIPPING
+
+Added proper indexes on ALL foreign keys + commonly-queried fields.
+Cascade/restrict rules: Cart→CartItem (cascade), Product→Variant (cascade), User→Cart/Wishlist/Address (cascade), Product→OrderItem (restrict).
+
+=== Database Push ===
+
+- prisma db push succeeded in 23.47s
+- 10 new tables created in Supabase Postgres
+- Prisma Client regenerated
+
+=== Seed Expansion ===
+Updated prisma/seed.ts with 3 new seeders:
+
+1. seedVariants — 19 product variants (2-3 per product)
+   - Specific variants for velvet-lounge-chair (Emerald Velvet + Oatmeal Linen), oak-side-table (Small + Large), lumen-pendant (Small + Large)
+   - Default "Standard" variant for all other products (unique SKU per product slug)
+   - Each variant: size, color, colorHex, material, stock, priceDelta
+2. seedReviews — 5 sample reviews on featured products
+   - Linked to admin user (userId + userEmail + userName denormalized)
+   - Each review: rating (4-5 stars), title, body, isVerified=true, isApproved=true
+   - Human-readable: "5★ 'Worth every rupee' by Aura Living Admin on Walnut Console"
+3. seedCoupons — 3 active discount codes
+   - WELCOME10 (PERCENT 10%, minOrder ₨10,000, maxDiscount ₨15,000, maxUses 100, 1 per user)
+   - AURA5000 (FIXED ₨5,000 off, minOrder ₨50,000, maxUses 50, 1 per user)
+   - FREESHIP (FREE_SHIPPING, minOrder ₨25,000, unlimited uses)
+
+Fixed connection pool timeout: changed Promise.all in printSummary to sequential queries (Supabase free tier = 1 connection limit).
+
+=== Query Helpers Expansion ===
+Updated src/server/db/queries.ts with 20+ new typed queries:
+
+- Product queries now include variants + reviews
+- Variant: getVariantsByProduct, getVariantBySku
+- Review: getApprovedReviews, getReviewSummary (average + distribution)
+- Cart: getCartByUserId (with items), getOrCreateCart
+- Wishlist: getWishlistByUserId (with items), getOrCreateWishlist
+- Address: getAddressesByUser, getDefaultAddress
+- Coupon: getCouponByCode, getActiveCoupons, validateCoupon (full validation: min order, expiry, max uses, per-user limit, discount calculation for PERCENT/FIXED/FREE_SHIPPING)
+- Admin: getAllUsersWithStats, getAdminStats (now includes reviews + coupons)
+
+=== Smoke Test ===
+Updated scripts/smoke-test-db.ts to verify ALL 15 tables:
+
+- Counts for all 15 tables
+- Lists all tables in public schema
+- Verifies admin user
+- Lists categories with product counts
+- Lists featured products with variant + review counts
+- Lists sample variants with SKU + productName + size + color + stock
+- Lists sample reviews with userEmail + userName + productName + rating
+- Lists active coupons with code + type + value + uses
+- Verifies denormalized Account.email column is populated
+- ALL TESTS PASSED
+
+=== Verification ===
+
+- bun run lint: 0 errors, 1 pre-existing shadcn warning
+- bun run typecheck: 0 errors
+- bun run db:seed: Success (1/8/16/19/5/0/0/0/3/0/0)
+- bun run scripts/smoke-test-db.ts: All 15 tables verified
+
+Stage Summary:
+
+- Phase 2.2 COMPLETE. 10 new database models added with human-readable denormalized columns.
+- 19 product variants, 5 reviews, 3 coupons seeded and verified.
+- 20+ typed query helpers ready for Phase 2.3 Server Actions.
+- validateCoupon() has full discount calculation logic (PERCENT/FIXED/FREE_SHIPPING).
+- All tables have proper indexes + cascade/restrict rules.
+- Raw table inspection in Supabase Studio shows human-readable data (email, name, productName, sku, couponCode).

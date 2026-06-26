@@ -2,6 +2,24 @@
 // Aura Living — Prisma Schema
 // Database: Supabase Postgres (pooler for runtime, direct for migrations)
 // =============================================================================
+//
+// Schema Versions:
+//   Phase 1   — Core models (User, Category, Product, Order, OrderItem)
+//   Phase 2.1 — Better Auth models (Account, Session, Verification) + admin fields
+//   Phase 2.2 — E-commerce models (ProductVariant, Review, ReviewImage, Cart,
+//               CartItem, Wishlist, WishlistItem, Address, Coupon, CouponUsage)
+//
+// Design Principles:
+//   1. Human-readable denormalized columns on every table (email, name, slug)
+//      so raw DB inspection in Supabase Studio shows meaningful data, not
+//      just random IDs.
+//   2. Proper indexes on all foreign keys + commonly-queried fields.
+//   3. Cascade deletes for owned relations (User → Cart, Cart → CartItem).
+//   4. Restrict deletes for referenced data (Product → OrderItem — can't
+//      delete a product that's in someone's order history).
+//   5. Decimal type for all monetary values (Decimal(10,2) = up to 99,999,999.99).
+//   6. Snake_case table names via @@map for Postgres convention.
+// =============================================================================
 
 generator client {
   provider        = "prisma-client-js"
@@ -13,14 +31,12 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  // Postgres extensions we'll use in Phase 2 for full-text search.
+  // Postgres extensions we'll use in Phase 3 for full-text search.
   extensions = [pg_trgm, unaccent]
 }
 
-// -----------------------------------------------------------------------------
-// Phase 1 — Core models (User, Category, Product, Order, OrderItem)
-// Phase 2 — Better Auth models (account, session, verification) added on User
-// Phase 2.2 will expand: ProductVariant, Review, Cart, Wishlist, Address, Coupon
+// =============================================================================
+// ENUMS
 // =============================================================================
 
 enum UserRole {
@@ -46,6 +62,22 @@ enum OrderStatus {
   FAILED
 }
 
+enum AddressType {
+  SHIPPING
+  BILLING
+  BOTH
+}
+
+enum CouponType {
+  PERCENT
+  FIXED
+  FREE_SHIPPING
+}
+
+// =============================================================================
+// AUTHENTICATION MODELS (Better Auth managed)
+// =============================================================================
+
 model User {
   id            String    @id @unique
   email         String    @unique
@@ -61,18 +93,23 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Better Auth relations
-  accounts Account[]
-  sessions Session[]
+  accounts  Account[]
+  sessions  Session[]
 
-  orders Order[]
+  // E-commerce relations (Phase 2.2)
+  orders        Order[]
+  reviews       Review[]
+  carts         Cart[]
+  wishlists     Wishlist[]
+  addresses     Address[]
+  couponUsages  CouponUsage[]
 
   @@map("users")
 }
 
 // Better Auth: stores credentials (email/password) + future OAuth providers
 // HUMAN-READABLE: `email` column is denormalized from User.email for easy
-// raw-table inspection in Supabase Studio (so you see "admin@auraliving.pk"
-// instead of just "VdrzGXwIJKI898O6mNAebMP9Sqt2mCGt").
+// raw-table inspection in Supabase Studio.
 // Nullable because Better Auth creates the row first, then we backfill via
 // the `after` hook in src/server/auth/config.ts.
 model Account {
@@ -101,7 +138,6 @@ model Account {
 
 // Better Auth: JWT sessions
 // HUMAN-READABLE: `userEmail` column is denormalized for raw-table inspection.
-// Nullable — populated by databaseHooks.session.create.after.
 model Session {
   id        String   @id @unique
   userId    String
@@ -132,6 +168,10 @@ model Verification {
   @@index([identifier])
   @@map("verifications")
 }
+
+// =============================================================================
+// CATALOG MODELS
+// =============================================================================
 
 model Category {
   id        String      @id @default(cuid())
@@ -168,13 +208,235 @@ model Product {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
-  orderItems OrderItem[]
+  // Phase 2.2 relations
+  variants      ProductVariant[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
 
   @@index([categoryId])
   @@index([status])
   @@index([isFeatured])
   @@map("products")
 }
+
+// ProductVariant — size, color, material combinations
+// HUMAN-READABLE: `productName` + `sku` columns for raw-table inspection.
+model ProductVariant {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // Denormalized for human readability
+  productName String
+  sku         String   @unique
+  size        String?
+  color       String?
+  colorHex    String?  // e.g., "#8B4513" for rendering swatches
+  material    String?
+  stock       Int      @default(0)
+  priceDelta  Decimal  @db.Decimal(10, 2) @default(0)  // Added to product.basePrice
+  imageUrl    String?  // Variant-specific image (optional)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+
+  @@index([productId])
+  @@index([sku])
+  @@index([isActive])
+  @@map("product_variants")
+}
+
+// =============================================================================
+// REVIEW MODELS
+// =============================================================================
+
+// Review — customer ratings + written reviews
+// HUMAN-READABLE: `userEmail` + `userName` + `productName` + `productSlug`
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Denormalized for human readability
+  userEmail    String
+  userName     String?
+  productName  String
+  productSlug  String
+  rating      Int      // 1-5 stars
+  title       String?
+  body        String
+  // Verified buyer = user has purchased this product
+  isVerified  Boolean  @default(false)
+  isApproved  Boolean  @default(true)  // Admin moderation flag
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  images ReviewImage[]
+
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([isApproved])
+  @@index([isVerified])
+  @@map("reviews")
+}
+
+// ReviewImage — photos uploaded with reviews
+model ReviewImage {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([reviewId])
+  @@map("review_images")
+}
+
+// =============================================================================
+// CART MODELS (server-side for auth users)
+// =============================================================================
+
+// Cart — one per user (created on first add-to-cart)
+// HUMAN-READABLE: `userEmail` column
+model Cart {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Denormalized for human readability
+  userEmail String?
+  // Snapshot of cart totals (updated on every add/remove/update)
+  subtotal  Decimal   @db.Decimal(10, 2) @default(0)
+  itemCount Int       @default(0)
+  currency  String    @default("PKR")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  items CartItem[]
+
+  @@index([userId])
+  @@index([userEmail])
+  @@map("carts")
+}
+
+// CartItem — individual line items in a cart
+// HUMAN-READABLE: `productName` + `variantSku` columns
+model CartItem {
+  id         String          @id @default(cuid())
+  cartId     String
+  cart       Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId  String?
+  variant    ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  // Denormalized for human readability — snapshot at add-to-cart time
+  productName String
+  productSlug String
+  variantSku  String?
+  variantLabel String?  // e.g., "Large / Walnut / Velvet"
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2)  // Snapshot of price at add time
+  totalPrice  Decimal @db.Decimal(10, 2)  // unitPrice × quantity
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([cartId])
+  @@index([productId])
+  @@index([variantId])
+  @@map("cart_items")
+}
+
+// =============================================================================
+// WISHLIST MODELS
+// =============================================================================
+
+// Wishlist — one per user
+// HUMAN-READABLE: `userEmail` column
+model Wishlist {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Denormalized for human readability
+  userEmail String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  items WishlistItem[]
+
+  @@index([userId])
+  @@index([userEmail])
+  @@map("wishlists")
+}
+
+// WishlistItem — saved products
+// HUMAN-READABLE: `productName` + `variantSku` columns
+model WishlistItem {
+  id          String          @id @default(cuid())
+  wishlistId  String
+  wishlist    Wishlist        @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  // Denormalized for human readability
+  productName String
+  productSlug String
+  variantSku  String?
+  variantLabel String?
+  createdAt   DateTime @default(now())
+
+  // One wishlist item per product+variant combo
+  @@unique([wishlistId, productId, variantId])
+  @@index([wishlistId])
+  @@index([productId])
+  @@index([variantId])
+  @@map("wishlist_items")
+}
+
+// =============================================================================
+// ADDRESS MODEL
+// =============================================================================
+
+// Address — shipping + billing addresses for users
+// HUMAN-READABLE: `userEmail` + full address fields
+model Address {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Denormalized for human readability
+  userEmail  String
+  type       AddressType  @default(BOTH)
+  firstName  String
+  lastName   String
+  company    String?
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  postalCode String
+  country    String       @default("Pakistan")
+  phone      String?
+  isDefault  Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([userEmail])
+  @@index([isDefault])
+  @@map("addresses")
+}
+
+// =============================================================================
+// ORDER MODELS (expanded from Phase 1)
+// =============================================================================
 
 model Order {
   id              String      @id @default(cuid())
@@ -186,35 +448,111 @@ model Order {
   subtotal        Decimal     @db.Decimal(10, 2)
   shipping        Decimal     @db.Decimal(10, 2) @default(0)
   tax             Decimal     @db.Decimal(10, 2) @default(0)
+  discount        Decimal     @db.Decimal(10, 2) @default(0)
   total           Decimal     @db.Decimal(10, 2)
   currency        String      @default("PKR")
+  // Snapshot of addresses at order time (JSON for flexibility)
   shippingAddress Json
   billingAddress  Json
+  // Coupon used (optional — snapshot at order time)
+  couponCode      String?
+  // Tracking info (populated when order ships)
+  trackingNumber  String?
+  carrier         String?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  // Notes from customer + admin
+  customerNotes   String?
+  adminNotes      String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  items OrderItem[]
+  items         OrderItem[]
+  couponUsages  CouponUsage[]
 
   @@index([userId])
   @@index([status])
   @@index([userEmail])
+  @@index([couponCode])
+  @@index([createdAt])
   @@map("orders")
 }
 
 model OrderItem {
-  id          String  @id @default(cuid())
-  orderId     String
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String
-  product     Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  id           String           @id @default(cuid())
+  orderId      String
+  order        Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variantId    String?
+  variant      ProductVariant?  @relation(fields: [variantId], references: [id], onDelete: SetNull)
   // Denormalized for human readability — snapshot at order creation
-  productName String?
-  productSlug String?
-  quantity    Int
-  unitPrice   Decimal @db.Decimal(10, 2)
-  totalPrice  Decimal @db.Decimal(10, 2)
+  productName  String?
+  productSlug  String?
+  variantSku   String?
+  variantLabel String?
+  quantity     Int
+  unitPrice    Decimal @db.Decimal(10, 2)
+  totalPrice   Decimal @db.Decimal(10, 2)
 
   @@index([orderId])
   @@index([productId])
+  @@index([variantId])
   @@map("order_items")
+}
+
+// =============================================================================
+// COUPON MODELS
+// =============================================================================
+
+// Coupon — discount codes
+// HUMAN-READABLE: `code` column is the primary identifier
+model Coupon {
+  id          String     @id @default(cuid())
+  code        String     @unique
+  type        CouponType
+  value       Decimal    @db.Decimal(10, 2)  // PERCENT: 10 = 10% off | FIXED: 5000 = ₨5000 off
+  minOrder    Decimal?   @db.Decimal(10, 2)  // Minimum cart total required
+  maxDiscount Decimal?   @db.Decimal(10, 2)  // Cap on discount amount (for PERCENT)
+  maxUses     Int?       // Null = unlimited
+  usesCount   Int        @default(0)         // Tracks how many times used
+  maxUsesPerUser Int?    // Null = unlimited per user
+  startsAt    DateTime   @default(now())
+  expiresAt   DateTime?
+  isActive    Boolean    @default(true)
+  description String?    // Internal note for admin
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  usages CouponUsage[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([expiresAt])
+  @@map("coupons")
+}
+
+// CouponUsage — tracks who used which coupon on which order
+// HUMAN-READABLE: `userEmail` + `couponCode` columns
+model CouponUsage {
+  id         String   @id @default(cuid())
+  couponId   String
+  coupon     Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  // Denormalized for human readability
+  userEmail  String
+  couponCode String
+  discountAmount Decimal @db.Decimal(10, 2)  // Snapshot of discount applied
+  createdAt  DateTime @default(now())
+
+  @@unique([orderId])  // One coupon per order
+  @@index([couponId])
+  @@index([userId])
+  @@index([orderId])
+  @@index([userEmail])
+  @@index([couponCode])
+  @@map("coupon_usages")
 }

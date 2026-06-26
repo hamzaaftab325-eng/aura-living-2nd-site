@@ -430,16 +430,28 @@ async function seedProducts(categories: { id: string; slug: string }[]) {
 
 async function printSummary() {
   console.log("\n=== Seed Summary ===");
-  const [users, categories, products, orders, orderItems] = await Promise.all([
-    db.user.count(),
-    db.category.count(),
-    db.product.count(),
-    db.order.count(),
-    db.orderItem.count(),
-  ]);
+  // Run counts sequentially — Supabase free tier limits to 1 connection
+  const users = await db.user.count();
+  const categories = await db.category.count();
+  const products = await db.product.count();
+  const variants = await db.productVariant.count();
+  const reviews = await db.review.count();
+  const carts = await db.cart.count();
+  const wishlists = await db.wishlist.count();
+  const addresses = await db.address.count();
+  const coupons = await db.coupon.count();
+  const orders = await db.order.count();
+  const orderItems = await db.orderItem.count();
+
   console.log(`  Users:       ${users}`);
   console.log(`  Categories:  ${categories}`);
   console.log(`  Products:    ${products}`);
+  console.log(`  Variants:    ${variants}`);
+  console.log(`  Reviews:     ${reviews}`);
+  console.log(`  Carts:       ${carts}`);
+  console.log(`  Wishlists:   ${wishlists}`);
+  console.log(`  Addresses:   ${addresses}`);
+  console.log(`  Coupons:     ${coupons}`);
   console.log(`  Orders:      ${orders}`);
   console.log(`  OrderItems:  ${orderItems}`);
 
@@ -448,12 +460,315 @@ async function printSummary() {
   console.log("");
 }
 
+// ---------------------------------------------------------------------------
+// Product Variants — 2 per product (different size/material combos)
+// ---------------------------------------------------------------------------
+
+const VARIANT_TEMPLATES: Record<
+  string,
+  Array<{
+    sku: string;
+    size: string | null;
+    color: string | null;
+    colorHex: string | null;
+    material: string | null;
+    stock: number;
+    priceDelta: number;
+  }>
+> = {
+  "velvet-lounge-chair": [
+    {
+      sku: "VLC-WAL-EMR",
+      size: null,
+      color: "Emerald",
+      colorHex: "#2D6A4F",
+      material: "Velvet",
+      stock: 5,
+      priceDelta: 0,
+    },
+    {
+      sku: "VLC-WAL-OAT",
+      size: null,
+      color: "Oatmeal",
+      colorHex: "#E8DCC8",
+      material: "Linen",
+      stock: 8,
+      priceDelta: -5000,
+    },
+  ],
+  "oak-side-table": [
+    {
+      sku: "OST-SML-NAT",
+      size: "Small",
+      color: "Natural Oak",
+      colorHex: "#D4A76A",
+      material: "Oak",
+      stock: 12,
+      priceDelta: 0,
+    },
+    {
+      sku: "OST-LRG-NAT",
+      size: "Large",
+      color: "Natural Oak",
+      colorHex: "#D4A76A",
+      material: "Oak",
+      stock: 6,
+      priceDelta: 8000,
+    },
+  ],
+  "lumen-pendant": [
+    {
+      sku: "LUM-BRS-SML",
+      size: "Small (Ø22cm)",
+      color: "Brass",
+      colorHex: "#B5A642",
+      material: "Brass",
+      stock: 10,
+      priceDelta: 0,
+    },
+    {
+      sku: "LUM-BRS-LRG",
+      size: "Large (Ø32cm)",
+      color: "Brass",
+      colorHex: "#B5A642",
+      material: "Brass",
+      stock: 4,
+      priceDelta: 12000,
+    },
+  ],
+};
+
+const DEFAULT_VARIANTS = (productSlug: string) => [
+  {
+    sku: `${productSlug.toUpperCase().replace(/-/g, "-")}-STD`,
+    size: "Standard",
+    color: null,
+    colorHex: null,
+    material: null,
+    stock: 10,
+    priceDelta: 0,
+  },
+];
+
+async function seedVariants() {
+  console.log("→ Seeding product variants...");
+  const products = await db.product.findMany({
+    select: { id: true, slug: true, name: true },
+  });
+  let count = 0;
+
+  for (const product of products) {
+    const templates =
+      VARIANT_TEMPLATES[product.slug] ?? DEFAULT_VARIANTS(product.slug);
+
+    for (const tpl of templates) {
+      await db.productVariant.upsert({
+        where: { sku: tpl.sku },
+        update: {
+          productId: product.id,
+          productName: product.name,
+          size: tpl.size,
+          color: tpl.color,
+          colorHex: tpl.colorHex,
+          material: tpl.material,
+          stock: tpl.stock,
+          priceDelta: new Prisma.Decimal(tpl.priceDelta),
+        },
+        create: {
+          productId: product.id,
+          productName: product.name,
+          sku: tpl.sku,
+          size: tpl.size,
+          color: tpl.color,
+          colorHex: tpl.colorHex,
+          material: tpl.material,
+          stock: tpl.stock,
+          priceDelta: new Prisma.Decimal(tpl.priceDelta),
+          isActive: true,
+        },
+      });
+      count++;
+    }
+  }
+  console.log(`  ✓ ${count} variants seeded`);
+}
+
+// ---------------------------------------------------------------------------
+// Reviews — sample reviews on featured products
+// ---------------------------------------------------------------------------
+
+const SAMPLE_REVIEWS = [
+  {
+    productSlug: "velvet-lounge-chair",
+    rating: 5,
+    title: "Exceptional craftsmanship",
+    body: "The velvet lounge chair exceeded our expectations. The walnut frame is flawless and the emerald velvet is even more beautiful in person. White-glove delivery was professional and timely. This piece will be in our family for generations.",
+  },
+  {
+    productSlug: "lumen-pendant",
+    rating: 5,
+    title: "Perfect warm glow",
+    body: "We hung three of these over our dining table and the light they cast is warm and even — exactly what we wanted. The brass develops a beautiful patina. Highly recommend.",
+  },
+  {
+    productSlug: "oak-side-table",
+    rating: 4,
+    title: "Solid and well-made",
+    body: "Beautiful grain and the through-tenoned joinery is visible — exactly as described. Knocked one star because the oil finish needed a second coat after a month. Otherwise perfect.",
+  },
+  {
+    productSlug: "linen-throw",
+    rating: 5,
+    title: "My favorite throw",
+    body: "I bought this on a whim and now use it daily. It has softened beautifully with washing and the oatmeal color goes with everything. Considering buying a second one.",
+  },
+  {
+    productSlug: "walnut-console",
+    rating: 5,
+    title: "Worth every rupee",
+    body: "The walnut grain is stunning and the hand-rubbed oil finish feels premium. This is the kind of furniture you pass down to your children. Delivery team placed it perfectly in our entryway.",
+  },
+];
+
+async function seedReviews() {
+  console.log("→ Seeding sample reviews...");
+
+  // Get admin user for review author
+  const admin = await db.user.findFirst({
+    where: { role: "ADMIN" },
+    select: { id: true, email: true, name: true },
+  });
+
+  if (!admin) {
+    console.log(
+      "  ⚠ Skipping reviews — no admin user found. Run create-admin.ts first.",
+    );
+    return;
+  }
+
+  for (const review of SAMPLE_REVIEWS) {
+    const product = await db.product.findUnique({
+      where: { slug: review.productSlug },
+      select: { id: true, name: true, slug: true },
+    });
+    if (!product) continue;
+
+    // Use a composite unique key to make idempotent
+    const reviewId = `review-${product.slug}`;
+    await db.review.upsert({
+      where: { id: reviewId },
+      update: {
+        productId: product.id,
+        userId: admin.id,
+        rating: review.rating,
+        title: review.title,
+        body: review.body,
+        isVerified: true,
+        isApproved: true,
+      },
+      create: {
+        id: reviewId,
+        productId: product.id,
+        userId: admin.id,
+        userEmail: admin.email,
+        userName: admin.name,
+        productName: product.name,
+        productSlug: product.slug,
+        rating: review.rating,
+        title: review.title,
+        body: review.body,
+        isVerified: true,
+        isApproved: true,
+      },
+    });
+  }
+  console.log(`  ✓ ${SAMPLE_REVIEWS.length} reviews seeded`);
+}
+
+// ---------------------------------------------------------------------------
+// Coupons — 3 sample discount codes
+// ---------------------------------------------------------------------------
+
+const SAMPLE_COUPONS = [
+  {
+    code: "WELCOME10",
+    type: "PERCENT" as const,
+    value: 10,
+    minOrder: 10000,
+    maxDiscount: 15000,
+    maxUses: 100,
+    maxUsesPerUser: 1,
+    expiresAt: new Date("2026-12-31"),
+    description: "10% off for new customers (max ₨15,000 discount)",
+  },
+  {
+    code: "AURA5000",
+    type: "FIXED" as const,
+    value: 5000,
+    minOrder: 50000,
+    maxUses: 50,
+    maxUsesPerUser: 1,
+    expiresAt: new Date("2026-09-30"),
+    description: "₨5,000 off orders over ₨50,000",
+  },
+  {
+    code: "FREESHIP",
+    type: "FREE_SHIPPING" as const,
+    value: 0,
+    minOrder: 25000,
+    maxUses: null,
+    maxUsesPerUser: null,
+    expiresAt: null,
+    description: "Free shipping on orders over ₨25,000",
+  },
+];
+
+async function seedCoupons() {
+  console.log("→ Seeding sample coupons...");
+  for (const coupon of SAMPLE_COUPONS) {
+    await db.coupon.upsert({
+      where: { code: coupon.code },
+      update: {
+        type: coupon.type,
+        value: new Prisma.Decimal(coupon.value),
+        minOrder: coupon.minOrder ? new Prisma.Decimal(coupon.minOrder) : null,
+        maxDiscount: coupon.maxDiscount
+          ? new Prisma.Decimal(coupon.maxDiscount)
+          : null,
+        maxUses: coupon.maxUses,
+        maxUsesPerUser: coupon.maxUsesPerUser,
+        expiresAt: coupon.expiresAt,
+        description: coupon.description,
+        isActive: true,
+      },
+      create: {
+        code: coupon.code,
+        type: coupon.type,
+        value: new Prisma.Decimal(coupon.value),
+        minOrder: coupon.minOrder ? new Prisma.Decimal(coupon.minOrder) : null,
+        maxDiscount: coupon.maxDiscount
+          ? new Prisma.Decimal(coupon.maxDiscount)
+          : null,
+        maxUses: coupon.maxUses,
+        maxUsesPerUser: coupon.maxUsesPerUser,
+        expiresAt: coupon.expiresAt,
+        description: coupon.description,
+        isActive: true,
+      },
+    });
+  }
+  console.log(`  ✓ ${SAMPLE_COUPONS.length} coupons seeded`);
+}
+
 async function main() {
   console.log("\n🌱 Aura Living — Seeding Database...\n");
 
   try {
     const categories = await seedCategories();
     await seedProducts(categories);
+    await seedVariants();
+    await seedReviews();
+    await seedCoupons();
     await printSummary();
 
     console.log("✅ Seed complete!");

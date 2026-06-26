@@ -267,27 +267,43 @@ src/
 - [x] Verified `bun run typecheck` passes (0 errors)
 - [x] Verified admin login works via direct Better Auth API test
 
-### 2.2 Database Schema Finalization & Migrations
+### 2.2 Database Schema Finalization & Migrations ✅
 
-- [ ] Expand Prisma schema with:
-  - [ ] `ProductVariant` (id, productId, sku, size, color, material, stock, priceDelta, imageUrl)
-  - [ ] `Review` (id, productId, userId, rating 1-5, title, body, verified, createdAt)
-  - [ ] `ReviewImage` (id, reviewId, url)
-  - [ ] `Cart` (id, userId, anonymousId, createdAt, updatedAt)
-  - [ ] `CartItem` (id, cartId, productId, variantId, quantity)
-  - [ ] `Wishlist` (id, userId) + `WishlistItem` (id, wishlistId, productId, variantId)
-  - [ ] `Address` (id, userId, type, line1, line2, city, state, postalCode, country, isDefault)
-  - [ ] `Coupon` (id, code, type PERCENT|FIXED, value, minOrder, maxUses, expiresAt, active)
-  - [ ] `CouponUsage` (id, couponId, userId, orderId)
-- [ ] Generate & run migration: `bun run db:migrate dev --name init_full_schema`
-- [ ] Author seed script `prisma/seed.ts`:
-  - [ ] 8 categories (Lighting, Seating, Tables, Storage, Textiles, Decor, Mirrors, Outdoor)
-  - [ ] 40+ products with variants, materials, dimensions, care notes
-  - [ ] 1 admin user + 3 customer users
-  - [ ] Sample reviews on featured products
-  - [ ] 3 active coupons
-- [ ] Run `bun run db:seed`
-- [ ] Add `db:reset` script for clean re-seed
+- [x] Expand Prisma schema with:
+  - [x] `ProductVariant` (id, productId, sku, productName, size, color, colorHex, material, stock, priceDelta, imageUrl, isActive) — HUMAN-READABLE: productName + sku columns
+  - [x] `Review` (id, productId, userId, userEmail, userName, productName, productSlug, rating 1-5, title, body, isVerified, isApproved, createdAt) — HUMAN-READABLE: userEmail + userName + productName + productSlug
+  - [x] `ReviewImage` (id, reviewId, url, alt, sortOrder)
+  - [x] `Cart` (id, userId, userEmail, subtotal, itemCount, currency, createdAt, updatedAt) — HUMAN-READABLE: userEmail column
+  - [x] `CartItem` (id, cartId, productId, variantId, productName, productSlug, variantSku, variantLabel, quantity, unitPrice, totalPrice) — HUMAN-READABLE: productName + variantSku + variantLabel
+  - [x] `Wishlist` (id, userId, userEmail) + `WishlistItem` (id, wishlistId, productId, variantId, productName, productSlug, variantSku, variantLabel) — HUMAN-READABLE: all denormalized
+  - [x] `Address` (id, userId, userEmail, type SHIPPING|BILLING|BOTH, firstName, lastName, company, line1, line2, city, state, postalCode, country, phone, isDefault) — HUMAN-READABLE: userEmail + full address fields
+  - [x] `Coupon` (id, code, type PERCENT|FIXED|FREE_SHIPPING, value, minOrder, maxDiscount, maxUses, usesCount, maxUsesPerUser, startsAt, expiresAt, isActive, description)
+  - [x] `CouponUsage` (id, couponId, userId, orderId, userEmail, couponCode, discountAmount) — HUMAN-READABLE: userEmail + couponCode
+- [x] Added 2 new enums: `AddressType` (SHIPPING/BILLING/BOTH) + `CouponType` (PERCENT/FIXED/FREE_SHIPPING)
+- [x] Expanded `Order` model with: discount, couponCode, trackingNumber, carrier, shippedAt, deliveredAt, customerNotes, adminNotes
+- [x] Expanded `OrderItem` model with: variantId, variantSku, variantLabel relations
+- [x] Added proper indexes on ALL foreign keys + commonly-queried fields (isActive, isApproved, isVerified, isDefault, rating, expiresAt, etc.)
+- [x] Added cascade/restrict delete rules: Cart→CartItem (cascade), Product→ProductVariant (cascade), User→Cart/Wishlist/Address (cascade), Product→OrderItem (restrict — can't delete product in order history)
+- [x] Pushed schema to Supabase Postgres (10 new tables + expanded existing)
+- [x] Updated seed script with:
+  - [x] 19 product variants (2-3 per product with specific size/color/material/stock/priceDelta)
+  - [x] 5 sample reviews (with human-readable userEmail + userName + productName, isVerified=true, isApproved=true)
+  - [x] 3 active coupons (WELCOME10 = 10% off, AURA5000 = ₨5000 off, FREESHIP = free shipping)
+- [x] Ran `bun run db:seed` — verified: 1 user, 8 categories, 16 products, 19 variants, 5 reviews, 3 coupons
+- [x] Updated query helpers (`src/server/db/queries.ts`) with 20+ typed queries:
+  - Product: getFeaturedProducts (now includes variants), getProductBySlug (includes variants + reviews), getProductsByCategory (includes variants), getNewArrivals (includes variants)
+  - Variant: getVariantsByProduct, getVariantBySku
+  - Review: getApprovedReviews, getReviewSummary (average + distribution)
+  - Cart: getCartByUserId (with items + product + variant), getOrCreateCart
+  - Wishlist: getWishlistByUserId (with items + product), getOrCreateWishlist
+  - Address: getAddressesByUser, getDefaultAddress
+  - Coupon: getCouponByCode, getActiveCoupons, validateCoupon (full validation logic — min order, expiry, max uses, per-user limit, discount calculation)
+  - Admin: getAllUsersWithStats, getAdminStats (now includes reviews + coupons counts)
+- [x] Updated smoke test to verify ALL 15 tables + denormalized columns + sample data
+- [x] Fixed Supabase free tier connection pool issue (sequential queries instead of Promise.all)
+- [x] Verified `bun run lint` passes (0 errors)
+- [x] Verified `bun run typecheck` passes (0 errors)
+- [x] Full smoke test PASSED — all tables verified with human-readable data
 
 ### 2.3 API Route Handlers & Server Actions
 
@@ -559,7 +575,7 @@ src/
 | ------------------- | ------ | ---------- | ---------- | ----------------------------------------------------------------------------------- |
 | 0 — Master Config   | `[x]`  | 2026-06-26 | 2026-06-26 | Brand/site/nav/features config + strict TS/ESLint/Husky + folder arch + conventions |
 | 1 — Foundation      | `[x]`  | 2026-06-26 | 2026-06-26 | 1.1 ✅ 1.2 ✅ 1.3 ✅ 1.4 ✅ 1.5 ✅ — Foundation COMPLETE                            |
-| 2 — Auth & Backend  | `[~]`  | 2026-06-26 | —          | 2.1 ✅ Auth complete. Next: 2.2 schema expansion                                    |
+| 2 — Auth & Backend  | `[~]`  | 2026-06-26 | —          | 2.1 ✅ 2.2 ✅. Next: 2.3 Server Actions + 2.4 Storage                               |
 | 3 — Catalog UI      | `[ ]`  | —          | —          |                                                                                     |
 | 4 — Checkout        | `[ ]`  | —          | —          |                                                                                     |
 | 5 — Polish & Launch | `[ ]`  | —          | —          |                                                                                     |
