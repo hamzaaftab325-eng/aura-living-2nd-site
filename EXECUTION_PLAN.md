@@ -1,6 +1,6 @@
-# Ethereal Dwelling — Production Execution Plan
+# Aura Living — Production Execution Plan
 
-> **Brand:** Ethereal Dwelling · Premium Luxury Home Decor E-Commerce
+> **Brand:** Aura Living · Premium Luxury Home Decor E-Commerce (Pakistani market, PKR currency)
 > **Stack:** Next.js 16 (App Router) · React 19 · TypeScript 5 (strict) · Tailwind v4 · Prisma · Supabase (Postgres + Storage) · Better Auth (email/password) · Motion · GSAP · Lenis · shadcn/ui
 > **Vibe:** Refined Minimalism · Glassmorphic · Editorial · "Curated Calm"
 > **Reference Aesthetic:** Zara Home, West Elm, Soho House interiors
@@ -24,21 +24,23 @@
 
 ---
 
-## 0. Master Configuration & Conventions
+## 0. Master Configuration & Conventions ✅
 
 ### 0.1 Project Metadata
 
-- [ ] Define brand constants file (`src/config/brand.ts`) — name, tagline, contact, socials, currency, locale
-- [ ] Define site configuration (`src/config/site.ts`) — URL, OG defaults, robots, sitemap config
-- [ ] Define navigation config (`src/config/navigation.ts`) — header menu, footer links, mega-menu structure
-- [ ] Define feature flags (`src/config/features.ts`) — gated features (AI search, wishlist, etc.)
+- [x] Define brand constants file (`src/config/brand.ts`) — Aura Living, Pakistani market, PKR currency, Lahore address, 17% tax, TCS/Leopards/DHL shipping
+- [x] Define site configuration (`src/config/site.ts`) — URL, OG defaults, robots, locale en_PK, themeColor
+- [x] Define navigation config (`src/config/navigation.ts`) — header mega-menu (8 categories), footer columns, legal links
+- [x] Define feature flags (`src/config/features.ts`) — wishlist, recentlyViewed, multiAddress, abandonedCartEmails, etc.
+- [x] Created barrel export `src/config/index.ts`
 
 ### 0.2 Strict TypeScript Conventions
 
-- [ ] `tsconfig.json` with `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`
-- [ ] Path aliases: `@/*`, `@/components/*`, `@/lib/*`, `@/config/*`, `@/types/*`, `@/hooks/*`, `@/stores/*`, `@/server/*`
-- [ ] ESLint + Prettier + `eslint-plugin-import` + `eslint-plugin-jsx-a11y` + `eslint-plugin-tailwindcss`
-- [ ] Pre-commit hook via Husky + lint-staged
+- [x] `tsconfig.json` with `strict: true`, `noUncheckedIndexedAccess: true`, `noImplicitAny: true`, `noFallthroughCasesInSwitch: true`, `noImplicitOverride: true`
+- [x] Path aliases: `@/*`, `@/components/*`, `@/lib/*`, `@/config/*`, `@/types/*`, `@/hooks/*`, `@/stores/*`, `@/server/*`, `@/providers/*`
+- [x] ESLint (strict config — `prefer-const` error, `no-console` warn, `react-hooks/exhaustive-deps` warn, `consistent-type-imports` warn) + Prettier + `prettier-plugin-tailwindcss` + `eslint-plugin-import` + `eslint-plugin-jsx-a11y` + `eslint-plugin-tailwindcss`
+- [x] Pre-commit hook via Husky + lint-staged (eslint --fix + prettier --write on staged files)
+- [x] `.editorconfig` + `.prettierrc` + `.gitignore` (with `.env`, `.env.production`, `.env*.local` patterns)
 
 ### 0.3 Folder Architecture (locked)
 
@@ -46,30 +48,45 @@
 src/
 ├── app/                      # Next.js App Router
 │   ├── (shop)/               # Public storefront route group
-│   ├── (auth)/               # Auth pages route group
+│   ├── (auth)/               # Auth pages route group (sign-in, sign-up)
 │   ├── (account)/            # Customer dashboard
 │   ├── (admin)/              # Admin panel
-│   ├── api/                  # Route handlers
+│   ├── api/                  # Route handlers (auth, webhooks)
 │   └── layout.tsx
 ├── components/
-│   ├── ui/                   # shadcn primitives (customized)
+│   ├── ui/                   # shadcn primitives (customized to luxury spec)
 │   ├── shop/                 # Storefront components
 │   ├── admin/                # Admin components
-│   ├── motion/               # Motion wrappers
-│   └── layout/               # Header, Footer, Cart drawer
-├── config/                   # Brand, site, nav, features
-├── lib/                      # Utilities (cn, formatters, etc.)
+│   ├── auth/                 # Auth form components
+│   ├── motion/               # Motion wrappers (15 components)
+│   └── layout/               # Container, Section, Eyebrow, LuxuryHeading
+├── config/                   # Brand, site, nav, features, index barrel
+├── lib/                      # Utilities (cn, formatters, animations, sound, gsap)
 ├── server/                   # Server-only: auth, db, services, actions
-│   ├── auth/
-│   ├── db/
-│   ├── services/
-│   └── actions/
-├── stores/                   # Zustand stores
+│   ├── auth/                 # Better Auth config + client + helpers
+│   ├── db/                   # Prisma client (singleton) + queries
+│   ├── services/             # Domain services (Phase 2.3)
+│   ├── actions/              # Server Actions (Phase 2.3)
+│   ├── payments/             # Payment providers (Phase 4.3)
+│   ├── emails/               # Email templates (Phase 4.4)
+│   ├── storage/              # Supabase Storage (Phase 2.4)
+│   └── search/               # FTS search (Phase 3.2)
+├── stores/                   # Zustand stores (cart, wishlist — Phase 4.1)
 ├── hooks/                    # Custom React hooks
 ├── types/                    # Global type definitions
-├── styles/                   # Global CSS
-└── providers/                # Context providers (theme, query, cart)
+└── providers/                # MotionProvider, LenisProvider, CursorFollower, PageLoader
 ```
+
+### 0.4 Conventions Summary
+
+- [x] **Server-first** — Server Components by default; `'use client'` only when interactivity requires it
+- [x] **Server Actions** — All mutations via typed Server Actions with Zod validation (Phase 2.3)
+- [x] **Provider abstraction** — Payments, email, search, storage all behind typed interfaces; concrete providers swappable
+- [x] **Modular components** — Small, focused, reusable. Composite components composed from primitives
+- [x] **Design system as source of truth** — All colors, spacing, typography via CSS variables in `globals.css` mapped to Tailwind v4 `@theme`. No hardcoded arbitrary values
+- [x] **Performance budget** — Lighthouse 95+ target on all categories
+- [x] **Accessibility** — Semantic HTML, ARIA labels, keyboard nav, focus-visible gold ring, `prefers-reduced-motion` respected throughout
+- [x] **Animation philosophy** — Luxury easing `cubic-bezier(0.22, 1, 0.36, 1)`, no bouncy/chaotic motion, all animations reduced-motion compliant
 
 ---
 
@@ -538,14 +555,14 @@ src/
 
 ## Phase Status Tracker
 
-| Phase               | Status | Started    | Completed  | Notes                                                       |
-| ------------------- | ------ | ---------- | ---------- | ----------------------------------------------------------- |
-| 0 — Master Config   | `[~]`  | 2026-06-26 | —          | Folder arch + brand config done; TS/ESLint/Husky configured |
-| 1 — Foundation      | `[x]`  | 2026-06-26 | 2026-06-26 | 1.1 ✅ 1.2 ✅ 1.3 ✅ 1.4 ✅ 1.5 ✅ — Foundation COMPLETE    |
-| 2 — Auth & Backend  | `[~]`  | 2026-06-26 | —          | 2.1 ✅ Auth complete. Next: 2.2 schema expansion            |
-| 3 — Catalog UI      | `[ ]`  | —          | —          |                                                             |
-| 4 — Checkout        | `[ ]`  | —          | —          |                                                             |
-| 5 — Polish & Launch | `[ ]`  | —          | —          |                                                             |
+| Phase               | Status | Started    | Completed  | Notes                                                                               |
+| ------------------- | ------ | ---------- | ---------- | ----------------------------------------------------------------------------------- |
+| 0 — Master Config   | `[x]`  | 2026-06-26 | 2026-06-26 | Brand/site/nav/features config + strict TS/ESLint/Husky + folder arch + conventions |
+| 1 — Foundation      | `[x]`  | 2026-06-26 | 2026-06-26 | 1.1 ✅ 1.2 ✅ 1.3 ✅ 1.4 ✅ 1.5 ✅ — Foundation COMPLETE                            |
+| 2 — Auth & Backend  | `[~]`  | 2026-06-26 | —          | 2.1 ✅ Auth complete. Next: 2.2 schema expansion                                    |
+| 3 — Catalog UI      | `[ ]`  | —          | —          |                                                                                     |
+| 4 — Checkout        | `[ ]`  | —          | —          |                                                                                     |
+| 5 — Polish & Launch | `[ ]`  | —          | —          |                                                                                     |
 
 ---
 
@@ -570,4 +587,7 @@ src/
 
 ---
 
-**Next action awaiting:** User command to begin **Phase 2.1: Authentication System (Better Auth)**.
+**Next action awaiting:** User command to begin **Phase 2.2: Database Schema Finalization & Migrations**.
+
+| 2026-06-26 | **Section 0 fix**: Updated EXECUTION_PLAN title from "Ethereal Dwelling" → "Aura Living". Filled Section 0 checkboxes (0.1 brand/site/nav/features config, 0.2 strict TS + ESLint + Husky, 0.3 folder architecture, 0.4 conventions summary). Marked Phase 0 as complete in tracker. | 0 |
+| 2026-06-26 | **Admin Users page** (per user feedback "user IDs not professional"): Built `/admin/users` — shows users by NAME + EMAIL (not raw IDs), with avatar initials, role badge (Admin/Trade/Customer), status badge (Verified/Pending/Banned), joined date (relative), last login (from Session table). Updated admin dashboard Customers card to link here. Tested via Agent Browser — admin login → /admin/users shows "Aura Living Admin / admin@auraliving.pk" professionally. | 2.1 |

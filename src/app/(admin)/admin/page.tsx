@@ -96,8 +96,8 @@ export default async function AdminPage() {
             <AdminCard
               icon={Users}
               title="Customers"
-              description="View customers and manage trade accounts."
-              href="/admin/customers"
+              description={`${userCount} registered users — view, manage roles, ban.`}
+              href="/admin/users"
             />
             <AdminCard
               icon={Package}

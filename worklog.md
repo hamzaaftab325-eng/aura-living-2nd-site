@@ -671,3 +671,72 @@ Stage Summary:
 - Protected /account + /admin pages built with luxury design system.
 - Vercel deployment guide created with all 12 env vars documented.
 - Ready to commit + push to GitHub, then user can deploy to Vercel.
+
+---
+
+Task ID: 2.1 REFINED — Admin Users Page + Section 0 Fix
+Agent: main
+Task: Per user feedback "user IDs not professional, client can't see which user is which" + "Section 0 not filled"
+
+Work Log:
+
+=== Issue 1: Section 0 (Master Configuration) not filled ===
+Root cause: Section 0 work was DONE in Phase 1.1 (brand.ts, site.ts, navigation.ts, features.ts all created; tsconfig.json strict; ESLint+Husky+lint-staged configured; folder architecture locked in). But the EXECUTION_PLAN.md checkboxes were never updated from the initial draft — they were still showing [ ].
+
+Also, the EXECUTION_PLAN.md title still said "Ethereal Dwelling" (old brand name from before the rebrand to Aura Living).
+
+Fix:
+
+- Updated title: "Ethereal Dwelling" → "Aura Living" + added "(Pakistani market, PKR currency)" to brand line
+- Updated 0.1 Project Metadata: all 5 checkboxes marked [x] with actual content described (Aura Living brand, en_PK locale, 8 categories in nav, etc.)
+- Updated 0.2 Strict TypeScript Conventions: all 5 checkboxes marked [x] with actual config (strict + noUncheckedIndexedAccess + noImplicitAny + noFallthroughCasesInSwitch + noImplicitOverride; path aliases including @/providers; ESLint with prefer-const error + no-console warn + consistent-type-imports; Husky pre-commit; .editorconfig + .prettierrc + .gitignore)
+- Updated 0.3 Folder Architecture: rewrote tree to match ACTUAL current structure (added (auth), admin, auth, motion subfolders under components; added actions, payments, emails, storage, search under server; removed styles folder; updated providers comment)
+- Added new 0.4 Conventions Summary section with 8 marked checkboxes (server-first, Server Actions, provider abstraction, modular components, design system as source of truth, performance budget, accessibility, animation philosophy)
+- Updated Phase Status Tracker: 0 — Master Config now shows [x] with completion date 2026-06-26
+
+=== Issue 2: Raw Account table is unprofessional ===
+User pasted raw Account table row showing random IDs (o9CxyMdkKiAzvAtZJLSUd9WZydEXRErv, HGbb74ABxtWYO0CX1slYRr36DBsXOmmm) and asked "how my client can see which user is — show user name make it professional".
+
+Root cause: The Account table is Better Auth's INTERNAL storage table (stores password hashes, OAuth tokens, etc.). It's NOT meant for human viewing — like how Stripe has internal `acct_xxx` IDs but the dashboard shows "John Smith / john@example.com". The raw table view in Supabase Studio / Prisma Studio will always show IDs because that's what's stored.
+
+The professional fix is NOT to change the IDs (Better Auth requires its secure random ID format). The fix is to build a proper admin UI that shows users by name/email/role — which is what a client would actually use.
+
+Built /admin/users page:
+
+- Server Component with requireAdmin guard
+- Fetches all users with their most recent Session (for last login) + order count
+- Professional table layout with 5 columns:
+  1. User (avatar initials + name + clickable email mailto:)
+  2. Role (LuxuryBadge: Admin=gold/Shield, Trade=limited/Package, Customer=subtle/UserIcon)
+  3. Status (LuxuryBadge: Verified=ink/CheckCircle2, Pending=subtle/Clock, Banned=sale/Ban)
+  4. Joined (relative time via date-fns formatDistanceToNow + absolute time in title attr)
+  5. Last Login (from most recent Session record, relative time + absolute in title)
+- "You" badge next to the currently-logged-in admin
+- Back to Admin link at top
+- Animated Counter showing total user count in header
+- Legend explaining role + status badges
+- Note about Phase 2.3 actions (change role, ban/unban, delete) coming soon
+- Responsive: collapses to single-column on mobile (md:grid-cols-12 vs grid-cols-1)
+
+Updated admin dashboard:
+
+- Customers card now links to /admin/users (was /admin/customers)
+- Description updated to include user count: "1 registered users — view, manage roles, ban."
+
+=== Verification ===
+
+- bun run lint: 0 errors, 1 pre-existing shadcn warning
+- bun run typecheck: 0 errors (after fixing noUncheckedIndexedAccess issues in getInitials helper)
+- Dev server restarted via .zscripts/dev.sh
+- Direct curl test: POST /api/auth/sign-in/email with admin credentials → 200 + session cookie set
+- Direct curl test: GET /admin/users with session cookie → 200 + HTML contains "Aura Living Admin", "admin@auraliving.pk", "Admin" badge, "Verified" badge
+- Agent Browser test: navigated to /sign-in → middleware redirected to /sign-in?redirect=/admin/users → filled credentials → clicked Sign In → redirected to /admin/users → page renders professionally with user's name + email (no raw IDs)
+- Screenshot saved: /home/z/my-project/download/phase-previews/phase-2.1-admin-users.png
+
+Stage Summary:
+
+- Section 0 of EXECUTION_PLAN.md now properly filled with all checkboxes marked done.
+- Title updated from "Ethereal Dwelling" → "Aura Living" throughout plan.
+- Admin Users page built — your client sees "Aura Living Admin / admin@auraliving.pk" professionally, not random IDs.
+- The raw Account table in Supabase Studio is internal Better Auth storage (password hashes, etc.) — clients should never look at it. The admin UI is the professional view.
+- Phase 2.1 now FULLY verified — admin login works end-to-end, protected routes redirect properly, admin can view all users professionally.
