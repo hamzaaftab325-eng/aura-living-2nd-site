@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Shop Listing Page — all products with PageHero + filters.
  * Server component pulling real products from DB.

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Product Detail Page — /product/[slug]
  * Server component pulling full product data (variants, reviews, category).

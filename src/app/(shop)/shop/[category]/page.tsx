@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Category Page — /shop/[category]
  * Server component with PageHero + products filtered by category.
