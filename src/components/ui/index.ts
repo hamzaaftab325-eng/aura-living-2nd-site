@@ -24,6 +24,20 @@ export { JournalCard } from "./journal-card";
 export { FAQAccordion } from "./faq-accordion";
 export { NewsletterSignup } from "./newsletter-signup";
 export { InstagramGrid } from "./instagram-grid";
+export { MegaMenu } from "./mega-menu";
+export { CartBadge } from "./cart-badge";
+export { QuantityStepper } from "./quantity-stepper";
+export { ParallaxFooter } from "./parallax-footer";
+export { SoundToggle } from "./sound-toggle";
+
+// --- Skeletons ---
+export {
+  SkeletonLine,
+  SkeletonText,
+  SkeletonImage,
+  SkeletonCard,
+  SkeletonGrid,
+} from "./skeleton-luxury";
 
 // --- Types ---
 export type { UnderlineInputProps } from "./underline-input";
@@ -34,5 +48,9 @@ export type { LuxuryBadgeProps } from "./luxury-badge";
 export type { CategoryCardProps } from "./category-card";
 export type { TestimonialCardProps } from "./testimonial-card";
 export type { JournalCardProps } from "./journal-card";
-export type { FAQAccordionProps } from "./faq-accordion";
+export type { FAQAccordionProps, FAQItem } from "./faq-accordion";
 export type { InstagramGridProps } from "./instagram-grid";
+export type { MegaMenuProps } from "./mega-menu";
+export type { CartBadgeProps } from "./cart-badge";
+export type { QuantityStepperProps } from "./quantity-stepper";
+export type { ParallaxFooterProps } from "./parallax-footer";

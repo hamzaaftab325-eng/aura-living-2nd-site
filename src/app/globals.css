@@ -716,4 +716,349 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
   }
+
+  /* =========================================================================
+   * REUSABLE HOVER UTILITIES — apply to any element via className
+   * ====================================================================== */
+
+  /* Hover lift — translateY + soft shadow */
+  .hover-lift {
+    transition:
+      transform var(--duration-base) var(--ease-luxury),
+      box-shadow var(--duration-base) var(--ease-luxury);
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Hover lift strong — larger translateY + deeper shadow */
+  .hover-lift-strong {
+    transition:
+      transform var(--duration-base) var(--ease-luxury),
+      box-shadow var(--duration-base) var(--ease-luxury);
+  }
+  .hover-lift-strong:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 28px 64px rgba(18, 18, 18, 0.12);
+  }
+
+  /* Hover zoom — scale image / element */
+  .hover-zoom {
+    transition: transform 700ms var(--ease-luxury);
+  }
+  .hover-zoom:hover {
+    transform: scale(1.04);
+  }
+  .hover-zoom-strong {
+    transition: transform 900ms var(--ease-luxury);
+  }
+  .hover-zoom-strong:hover {
+    transform: scale(1.08);
+  }
+
+  /* Hover glow — gold glow shadow */
+  .hover-glow {
+    transition: box-shadow var(--duration-base) var(--ease-luxury);
+  }
+  .hover-glow:hover {
+    box-shadow: var(--shadow-gold-glow);
+  }
+
+  /* Hover invert — bg/text color swap (for outline buttons) */
+  .hover-invert {
+    transition:
+      background-color var(--duration-base) var(--ease-luxury),
+      color var(--duration-base) var(--ease-luxury);
+  }
+
+  /* Hover gold — text shifts to gold */
+  .hover-gold {
+    transition: color var(--duration-base) var(--ease-luxury);
+  }
+  .hover-gold:hover {
+    color: var(--gold-deep);
+  }
+
+  /* =========================================================================
+   * GLASS / SHADOW / DEPTH UTILITIES — luxury surfaces
+   * ====================================================================== */
+
+  /* Frosted glass panel */
+  .glass-panel {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(18, 18, 18, 0.05);
+  }
+  .glass-panel-dark {
+    background-color: rgba(18, 18, 18, 0.65);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Layered soft shadows */
+  .soft-shadow {
+    box-shadow: var(--shadow-soft-ambient);
+  }
+  .layered-shadow {
+    box-shadow: var(--shadow-card-hover);
+  }
+  .luxury-shadow {
+    box-shadow: var(--shadow-modal);
+  }
+  .gold-shadow {
+    box-shadow: var(--shadow-gold-glow);
+  }
+
+  /* Layered depth — for stacked editorial cards */
+  .layered-depth {
+    position: relative;
+  }
+  .layered-depth::before {
+    content: "";
+    position: absolute;
+    inset: 12px -12px -12px 12px;
+    background-color: var(--cream);
+    z-index: -1;
+    border: 1px solid var(--line);
+  }
+
+  /* =========================================================================
+   * MOTION UTILITIES — organic easing + floating + reveal
+   * ====================================================================== */
+
+  /* Apply luxury easing to any transition */
+  .organic-ease {
+    transition-timing-function: var(--ease-luxury);
+  }
+
+  /* Slow floating animation — for decorative elements */
+  .floating {
+    animation: floating 6s ease-in-out infinite;
+  }
+  .floating-slow {
+    animation: floating 9s ease-in-out infinite;
+  }
+  .floating-fast {
+    animation: floating 4s ease-in-out infinite;
+  }
+  @keyframes floating {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-12px) rotate(1deg);
+    }
+  }
+
+  /* Slow pulse — for badges, status indicators */
+  .pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  /* Shimmer effect — for skeletons */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.6),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Reveal mask — overflow hidden wrapper for line/word reveals */
+  .reveal-mask {
+    overflow: hidden;
+    display: inline-block;
+  }
+
+  /* =========================================================================
+   * MICRO-INTERACTION UTILITIES — for icons, badges, dots
+   * ====================================================================== */
+
+  /* Icon rotate on parent hover */
+  .icon-rotate {
+    transition: transform var(--duration-base) var(--ease-luxury);
+  }
+  .group:hover .icon-rotate {
+    transform: rotate(45deg);
+  }
+
+  /* Icon slide right on parent hover */
+  .icon-slide-right {
+    transition: transform var(--duration-base) var(--ease-luxury);
+  }
+  .group:hover .icon-slide-right {
+    transform: translateX(4px);
+  }
+
+  /* Icon slide up-right (ArrowUpRight) on parent hover */
+  .icon-slide-up-right {
+    transition: transform var(--duration-base) var(--ease-luxury);
+  }
+  .group:hover .icon-slide-up-right {
+    transform: translate(2px, -2px);
+  }
+
+  /* Bounce on mount */
+  .bounce-in {
+    animation: bounce-in 0.6s var(--ease-luxury);
+  }
+  @keyframes bounce-in {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* =========================================================================
+   * GRADIENT UTILITIES — luxury backgrounds
+   * ====================================================================== */
+
+  .gradient-gold {
+    background: linear-gradient(
+      135deg,
+      var(--gold) 0%,
+      var(--gold-soft) 50%,
+      var(--gold-deep) 100%
+    );
+  }
+  .gradient-ink {
+    background: linear-gradient(180deg, var(--ink) 0%, #1f1f1f 100%);
+  }
+  .gradient-cream {
+    background: linear-gradient(
+      180deg,
+      var(--cream-warm) 0%,
+      var(--cream) 100%
+    );
+  }
+  .gradient-overlay-dark {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(18, 18, 18, 0.15) 40%,
+      rgba(18, 18, 18, 0.75) 100%
+    );
+  }
+  .gradient-overlay-light {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  /* =========================================================================
+   * TEXT EFFECTS — luxury typography refinements
+   * ====================================================================== */
+
+  /* Gradient gold text */
+  .text-gradient-gold {
+    background: linear-gradient(
+      135deg,
+      var(--gold-deep) 0%,
+      var(--gold) 50%,
+      var(--gold-soft) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Text outline (for hero overlays) */
+  .text-outline {
+    -webkit-text-stroke: 1px var(--ink);
+    -webkit-text-fill-color: transparent;
+  }
+  .text-outline-light {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.6);
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* =========================================================================
+   * LAYOUT HELPERS — for editorial compositions
+   * ====================================================================== */
+
+  /* Editorial asymmetric grid (12-col with featured cells) */
+  .grid-editorial {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--gutter);
+  }
+  .grid-editorial > .col-span-7 {
+    grid-column: span 7;
+  }
+  .grid-editorial > .col-span-5 {
+    grid-column: span 5;
+  }
+  .grid-editorial > .col-span-4 {
+    grid-column: span 4;
+  }
+  .grid-editorial > .col-span-8 {
+    grid-column: span 8;
+  }
+  @media (max-width: 768px) {
+    .grid-editorial > .col-span-7,
+    .grid-editorial > .col-span-5,
+    .grid-editorial > .col-span-4,
+    .grid-editorial > .col-span-8 {
+      grid-column: span 12;
+    }
+  }
+
+  /* Custom underline for inline links */
+  .link-underline {
+    background-image: linear-gradient(var(--gold), var(--gold));
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size var(--duration-base) var(--ease-luxury);
+    padding-bottom: 2px;
+  }
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+
+  /* Hide default cursor when custom cursor is active */
+  @media (hover: hover) and (pointer: fine) {
+    .cursor-none,
+    .cursor-none * {
+      cursor: none !important;
+    }
+  }
 }
