@@ -19,7 +19,8 @@ datasource db {
 
 // -----------------------------------------------------------------------------
 // Phase 1 — Core models (User, Category, Product, Order, OrderItem)
-// Phase 2 will expand: ProductVariant, Review, Cart, Wishlist, Address, Coupon
+// Phase 2 — Better Auth models (account, session, verification) added on User
+// Phase 2.2 will expand: ProductVariant, Review, Cart, Wishlist, Address, Coupon
 // =============================================================================
 
 enum UserRole {
@@ -46,16 +47,77 @@ enum OrderStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      UserRole @default(CUSTOMER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @unique
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  name          String?
+  role          UserRole  @default(CUSTOMER)
+  // Better Auth admin plugin fields
+  banned        Boolean   @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Better Auth relations
+  accounts Account[]
+  sessions Session[]
 
   orders Order[]
 
   @@map("users")
+}
+
+// Better Auth: stores credentials (email/password) + future OAuth providers
+model Account {
+  id                    String    @id @unique
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+// Better Auth: JWT sessions
+model Session {
+  id        String   @id @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// Better Auth: email verification + password reset tokens
+model Verification {
+  id         String   @id @unique
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
 }
 
 model Category {

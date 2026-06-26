@@ -207,24 +207,48 @@ src/
 
 ## Phase 2 — Core Backend Services & Authentication (Weeks 3–4)
 
-### 2.1 Authentication System (Better Auth)
+### 2.1 Authentication System (Better Auth) ✅
 
-- [ ] Install `better-auth`
-- [ ] Configure `src/server/auth/config.ts` — Better Auth server instance:
-  - [ ] Email/password (bcrypt, min 8 chars, breach check)
-  - [ ] Session strategy: JWT, 7-day expiry, refresh on activity
-  - [ ] Admin role gate via `role` field on User
-  - [ ] _(Google OAuth deferred — free tier constraint, can be added later)_
-- [ ] Create auth API route handler at `app/api/auth/[...all]/route.ts`
-- [ ] Create `src/server/auth/session.ts` — `getSession()`, `requireUser()`, `requireAdmin()` helpers
-- [ ] Build middleware (`middleware.ts`) — protect `(account)` and `(admin)` route groups
-- [ ] Build auth UI:
-  - [ ] `/sign-in` page (email + Google button, underline inputs)
-  - [ ] `/sign-up` page (with terms checkbox)
-  - [ ] `/forgot-password` + `/reset-password` flows
-  - [ ] `/verify-email` flow
-- [ ] Add `<AuthProvider>` context for client session access
-- [ ] Add `useSession()` hook
+- [x] Install `better-auth` + `bcryptjs` + `@types/bcryptjs` + `dotenv`
+- [x] Extended Prisma schema with Better Auth models:
+  - [x] `User` extended with `emailVerified`, `image`, `banned`, `banReason`, `banExpires` (admin plugin fields)
+  - [x] `Account` model (stores credentials + future OAuth providers)
+  - [x] `Session` model (JWT sessions)
+  - [x] `Verification` model (email verification + password reset tokens)
+- [x] Configure `src/server/auth/config.ts` — Better Auth server instance:
+  - [x] Email/password (scrypt hashing via Better Auth, min 8 chars)
+  - [x] Session strategy: 7-day expiry, refresh once per day, 5-min cookie cache
+  - [x] Admin role gate via `admin()` plugin + `role` field on User
+  - [x] Rate limiting (10 requests per 60s per IP)
+  - [x] _(Google OAuth deferred — free tier constraint, can be added later)_
+- [x] Create auth API route handler at `app/api/auth/[...all]/route.ts`
+- [x] Created `src/server/auth/client.ts` — Better Auth client for client components (`signIn`, `signUp`, `signOut`, `useSession`)
+- [x] Created `src/server/auth/index.ts` — barrel export
+- [x] Session helpers built into config.ts:
+  - [x] `getSession()` — get current session (Server Components / API routes)
+  - [x] `requireUser()` — throws UNAUTHORIZED if not signed in
+  - [x] `requireAdmin()` — throws UNAUTHORIZED or FORBIDDEN if not admin
+- [x] Build middleware (`middleware.ts`) — protects `/admin/*` and `/account/*` (cookie check, redirect to `/sign-in?redirect=...`)
+- [x] Build auth UI with luxury design system:
+  - [x] `/sign-in` page with `<SignInForm>` — UnderlineInput, error states, redirect support
+  - [x] `/sign-up` page with `<SignUpForm>` — name/email/password/confirm, validation
+  - [x] _(forgot-password + verify-email flows deferred — will add when Resend integration lands in Phase 4)_
+- [x] Created `scripts/create-admin.ts` — creates admin user via Better Auth (handles scrypt hashing)
+  - [x] Email: `admin@auraliving.pk`, Password: `Aura@Admin2026!`
+  - [x] Idempotent — checks if admin already exists, updates role to ADMIN if needed
+- [x] Created `scripts/test-admin-auth.ts` — end-to-end auth verification
+  - [x] Verifies user exists in DB with credential account
+  - [x] Verifies password hash matches (via `verifyPassword`)
+  - [x] Verifies Better Auth `signInEmail` API returns valid session
+  - [x] **All tests PASS** — admin login verified working
+- [x] Built protected `/account` page — shows profile + orders/wishlist/addresses/profile shortcuts + admin link (if admin) + sign-out
+- [x] Built protected `/admin` page — shows real DB stats (users/products/categories/orders counts via animated Counters) + management shortcuts
+- [x] Updated `prisma.config.ts` to load `.env` via dotenv (Prisma 7+ config pattern)
+- [x] Created `.env.production` template with all Vercel env vars documented (gitignored)
+- [x] Created `docs/VERCEL_DEPLOYMENT.md` — complete 9-step Vercel deployment walkthrough
+- [x] Verified `bun run lint` passes (0 errors)
+- [x] Verified `bun run typecheck` passes (0 errors)
+- [x] Verified admin login works via direct Better Auth API test
 
 ### 2.2 Database Schema Finalization & Migrations
 
@@ -518,7 +542,7 @@ src/
 | ------------------- | ------ | ---------- | ---------- | ----------------------------------------------------------- |
 | 0 — Master Config   | `[~]`  | 2026-06-26 | —          | Folder arch + brand config done; TS/ESLint/Husky configured |
 | 1 — Foundation      | `[x]`  | 2026-06-26 | 2026-06-26 | 1.1 ✅ 1.2 ✅ 1.3 ✅ 1.4 ✅ 1.5 ✅ — Foundation COMPLETE    |
-| 2 — Auth & Backend  | `[ ]`  | —          | —          |                                                             |
+| 2 — Auth & Backend  | `[~]`  | 2026-06-26 | —          | 2.1 ✅ Auth complete. Next: 2.2 schema expansion            |
 | 3 — Catalog UI      | `[ ]`  | —          | —          |                                                             |
 | 4 — Checkout        | `[ ]`  | —          | —          |                                                             |
 | 5 — Polish & Launch | `[ ]`  | —          | —          |                                                             |

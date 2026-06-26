@@ -16,13 +16,10 @@ import { db } from "../src/server/db";
 import { Prisma } from "@prisma/client";
 
 // ---------------------------------------------------------------------------
-// Admin user — for development. CHANGE PASSWORD in production.
+// Admin user — created via `bun run scripts/create-admin.ts` (handles bcrypt).
+// The seed script only creates categories + products (no users).
 // ---------------------------------------------------------------------------
-const ADMIN_USER = {
-  email: "admin@auraliving.pk",
-  name: "Aura Living Admin",
-  role: "ADMIN" as const,
-};
+// (Admin user creation handled separately — see scripts/create-admin.ts)
 
 // ---------------------------------------------------------------------------
 // 8 Categories — matches src/config/navigation.ts
@@ -361,16 +358,8 @@ const PRODUCTS = [
 // ---------------------------------------------------------------------------
 // Seeder
 // ---------------------------------------------------------------------------
-async function seedAdminUser() {
-  console.log("→ Seeding admin user...");
-  const user = await db.user.upsert({
-    where: { email: ADMIN_USER.email },
-    update: { name: ADMIN_USER.name, role: ADMIN_USER.role },
-    create: ADMIN_USER,
-  });
-  console.log(`  ✓ Admin user: ${user.email} (${user.role})`);
-  return user;
-}
+// Note: Admin user is created via `bun run scripts/create-admin.ts`
+// which uses Better Auth's signUpEmail for proper bcrypt password hashing.
 
 async function seedCategories() {
   console.log(`→ Seeding ${CATEGORIES.length} categories...`);
@@ -463,14 +452,14 @@ async function main() {
   console.log("\n🌱 Aura Living — Seeding Database...\n");
 
   try {
-    const admin = await seedAdminUser();
     const categories = await seedCategories();
     await seedProducts(categories);
     await printSummary();
 
     console.log("✅ Seed complete!");
-    console.log(`\nAdmin login: ${admin.email}`);
-    console.log("(Set password via Better Auth in Phase 2.1)\n");
+    console.log(
+      "\nNext: Run `bun run scripts/create-admin.ts` to create the admin user.\n",
+    );
   } catch (error) {
     console.error("\n❌ Seed failed:", error);
     process.exit(1);
