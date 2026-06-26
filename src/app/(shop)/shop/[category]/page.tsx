@@ -1,0 +1,136 @@
+/**
+ * Category Page — /shop/[category]
+ * Server component pulling products by category slug from DB.
+ */
+
+import {
+  Container,
+  Section,
+  Eyebrow,
+  LuxuryHeading,
+} from "@/components/layout";
+import {
+  RevealOnScroll,
+  StaggerContainer,
+  StaggerItem,
+} from "@/components/motion";
+import { ProductCard } from "@/components/ui";
+import { db } from "@/server/db";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+interface PageProps {
+  params: Promise<{ category: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { category } = await params;
+  const cat = await db.category.findUnique({ where: { slug: category } });
+  return {
+    title: cat?.name ?? "Shop",
+    description: `Browse ${cat?.name ?? "our"} collection at Aura Living.`,
+  };
+}
+
+export default async function CategoryPage({ params }: PageProps) {
+  const { category: slug } = await params;
+  const category = await db.category.findUnique({
+    where: { slug },
+    include: { _count: { select: { products: true } } },
+  });
+
+  if (!category) notFound();
+
+  const products = await db.product.findMany({
+    where: { categoryId: category.id, status: "ACTIVE" },
+    orderBy: { createdAt: "desc" },
+    include: {
+      category: true,
+      variants: { where: { isActive: true }, take: 1 },
+    },
+  });
+
+  // Fetch all categories for the filter bar
+  const allCategories = await db.category.findMany({
+    orderBy: { sortOrder: "asc" },
+    include: { _count: { select: { products: true } } },
+  });
+
+  return (
+    <Container>
+      <Section spacing="xl">
+        {/* Header */}
+        <div className="flex flex-col gap-3">
+          <RevealOnScroll variant="fade">
+            <Eyebrow tone="gold">Collection</Eyebrow>
+          </RevealOnScroll>
+          <RevealOnScroll variant="fade-up" delay={0.1}>
+            <LuxuryHeading variant="display-lg" as="h1" balance>
+              {category.name}
+            </LuxuryHeading>
+          </RevealOnScroll>
+          <RevealOnScroll variant="fade-up" delay={0.2}>
+            <p className="text-body-lg text-[var(--stone)]">
+              {products.length} {products.length === 1 ? "piece" : "pieces"} —
+              crafted for considered living.
+            </p>
+          </RevealOnScroll>
+        </div>
+
+        {/* Category filter chips */}
+        <RevealOnScroll variant="fade-up" delay={0.3} className="mt-10">
+          <div className="flex flex-wrap gap-3 border-b border-[var(--line)] pb-8">
+            <a href="/shop" className="chip">
+              All
+            </a>
+            {allCategories.map((cat) => (
+              <a
+                key={cat.id}
+                href={`/shop/${cat.slug}`}
+                className={`chip ${cat.slug === slug ? "border-[var(--ink)] bg-[var(--ink)] text-white" : ""}`}
+              >
+                {cat.name} ({cat._count.products})
+              </a>
+            ))}
+          </div>
+        </RevealOnScroll>
+
+        {/* Product grid */}
+        {products.length > 0 ? (
+          <StaggerContainer
+            stagger={0.08}
+            amount={0.1}
+            className="mt-12 grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 lg:grid-cols-4"
+          >
+            {products.map((product) => (
+              <StaggerItem key={product.id} variant="fade-up">
+                <ProductCard
+                  name={product.name}
+                  price={Number(product.basePrice)}
+                  image={
+                    product.images[0] ??
+                    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
+                  }
+                  alternateImage={product.images[1]}
+                  category={product.category?.name}
+                  badge={product.isFeatured ? "Bestseller" : undefined}
+                />
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        ) : (
+          <div className="mt-20 text-center">
+            <p className="text-body-lg text-[var(--muted)]">
+              No pieces in this collection yet.
+            </p>
+            <a href="/shop" className="btn-primary mt-6 inline-flex">
+              View All Products
+            </a>
+          </div>
+        )}
+      </Section>
+    </Container>
+  );
+}
