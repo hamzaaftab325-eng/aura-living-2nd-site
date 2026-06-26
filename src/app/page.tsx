@@ -57,7 +57,6 @@ import {
   DrawLine,
   DecorativeDivider,
   FloatingElement,
-  MagneticWrap,
 } from "@/components/motion";
 import {
   Button,
@@ -235,36 +234,29 @@ export default function HomePage() {
 
               <RevealOnScroll variant="fade-up" delay={0.85} amount={0.4}>
                 <div className="flex flex-wrap gap-4 pt-2">
-                  <MagneticWrap strength={0.25} radius={10}>
-                    <Button variant="primary" size="lg" asChild>
-                      <a
-                        href="#products"
-                        data-cursor="text"
-                        data-cursor-text="Shop"
-                      >
-                        Shop the Collection
-                        <ArrowRight
-                          className="arrow h-4 w-4"
-                          strokeWidth={1.5}
-                        />
-                      </a>
-                    </Button>
-                  </MagneticWrap>
-                  <MagneticWrap strength={0.2} radius={10}>
-                    <Button variant="outline-luxury" size="lg" asChild>
-                      <a
-                        href="#atelier"
-                        data-cursor="text"
-                        data-cursor-text="Explore"
-                      >
-                        Explore Atelier
-                        <ArrowUpRight
-                          className="arrow h-4 w-4"
-                          strokeWidth={1.5}
-                        />
-                      </a>
-                    </Button>
-                  </MagneticWrap>
+                  <Button variant="primary" size="lg" asChild>
+                    <a
+                      href="#products"
+                      data-cursor="text"
+                      data-cursor-text="Shop"
+                    >
+                      Shop the Collection
+                      <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
+                    </a>
+                  </Button>
+                  <Button variant="outline-luxury" size="lg" asChild>
+                    <a
+                      href="#atelier"
+                      data-cursor="text"
+                      data-cursor-text="Explore"
+                    >
+                      Explore Atelier
+                      <ArrowUpRight
+                        className="arrow h-4 w-4"
+                        strokeWidth={1.5}
+                      />
+                    </a>
+                  </Button>
                 </div>
               </RevealOnScroll>
 
@@ -441,18 +433,12 @@ export default function HomePage() {
             </BlurReveal>
             <BlurReveal variant="blur-up" delay={0.5} amount={0.3}>
               <div className="mt-8">
-                <MagneticWrap strength={0.2} radius={10}>
-                  <Button variant="gold" size="lg" asChild>
-                    <a
-                      href="#atelier"
-                      data-cursor="text"
-                      data-cursor-text="Read"
-                    >
-                      Read the Story
-                      <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
-                    </a>
-                  </Button>
-                </MagneticWrap>
+                <Button variant="gold" size="lg" asChild>
+                  <a href="#atelier" data-cursor="text" data-cursor-text="Read">
+                    Read the Story
+                    <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
+                  </a>
+                </Button>
               </div>
             </BlurReveal>
           </div>
@@ -516,14 +502,12 @@ export default function HomePage() {
         </StaggerContainer>
 
         <div className="mt-16 flex justify-center">
-          <MagneticWrap strength={0.2} radius={10}>
-            <Button variant="outline-luxury" size="lg" asChild>
-              <a href="/shop" data-cursor="text" data-cursor-text="Browse">
-                View All Products
-                <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
-              </a>
-            </Button>
-          </MagneticWrap>
+          <Button variant="outline-luxury" size="lg" asChild>
+            <a href="/shop" data-cursor="text" data-cursor-text="Browse">
+              View All Products
+              <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
+            </a>
+          </Button>
         </div>
       </Section>
 
@@ -830,14 +814,12 @@ export default function HomePage() {
           </BlurReveal>
           <BlurReveal variant="blur-up" delay={0.3} amount={0.3}>
             <div className="mt-10 flex justify-center">
-              <MagneticWrap strength={0.2} radius={10}>
-                <Button variant="gold" size="xl" asChild>
-                  <a href="/trade" data-cursor="text" data-cursor-text="Apply">
-                    Apply for Trade Access
-                    <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
-                  </a>
-                </Button>
-              </MagneticWrap>
+              <Button variant="gold" size="xl" asChild>
+                <a href="/trade" data-cursor="text" data-cursor-text="Apply">
+                  Apply for Trade Access
+                  <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
+                </a>
+              </Button>
             </div>
           </BlurReveal>
         </Container>
@@ -847,7 +829,6 @@ export default function HomePage() {
        * 15. ParallaxFooter
        * ============================================================= */}
       <ParallaxFooter
-        backgroundImage="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1920&q=80"
         columns={[
           {
             title: "Shop",
