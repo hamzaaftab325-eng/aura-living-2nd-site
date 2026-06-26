@@ -1,0 +1,630 @@
+/* =============================================================================
+ * Aura Living — Global Design System
+ * -----------------------------------------------------------------------------
+ * Single source of truth for brand tokens. Tailwind v4 reads these via @theme.
+ * Reference: DESIGN.md ("Ethereal Dwelling" spec — applied to Aura Living brand)
+ *
+ * Token naming convention:
+ *   --color-*    → Tailwind color utilities (bg-*, text-*, border-*)
+ *   --font-*     → Tailwind font utilities (font-*)
+ *   --text-*     → Tailwind text utilities (text-display-lg, text-headline-md, …)
+ *   --space-*    → Tailwind spacing utilities (p-*, m-*, gap-*)
+ *   --radius-*   → Tailwind rounded utilities (rounded-*)
+ *   --shadow-*   → Tailwind shadow utilities (shadow-*)
+ *   --ease-*     → Motion easing tokens (consumed by Motion + GSAP wrappers)
+ *   --duration-* → Motion duration tokens
+ * ========================================================================== */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =============================================================================
+ * @theme — Tailwind v4 token mapping
+ * Maps raw CSS variables into Tailwind utility class namespace.
+ * All values reference :root tokens defined below → single source of truth.
+ * ========================================================================== */
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-mono);
+
+  /* Colors — shadcn-compatible bridge (legacy) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Aura Living brand colors (the source of truth) */
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-deep: var(--gold-deep);
+  --color-cream: var(--cream);
+  --color-cream-warm: var(--cream-warm);
+  --color-ink: var(--ink);
+  --color-stone: var(--stone);
+  --color-line: var(--line);
+
+  /* Typography scale */
+  --text-display-xl: var(--text-display-xl-value);
+  --text-display-lg: var(--text-display-lg-value);
+  --text-display-md: var(--text-display-md-value);
+  --text-headline-lg: var(--text-headline-lg-value);
+  --text-headline-md: var(--text-headline-md-value);
+  --text-headline-sm: var(--text-headline-sm-value);
+  --text-body-lg: var(--text-body-lg-value);
+  --text-body-md: var(--text-body-md-value);
+  --text-body-sm: var(--text-body-sm-value);
+  --text-label-caps: var(--text-label-caps-value);
+
+  /* Radii — disciplined, "soft but not bubbly" */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Container */
+  --container-luxury: 1440px;
+
+  /* Shadows — depth via transparency, never heavy borders */
+  --shadow-soft-ambient: 0 10px 30px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 18px 48px rgba(18, 18, 18, 0.07);
+  --shadow-glassmorphic: 0 4px 24px rgba(18, 18, 18, 0.05);
+  --shadow-modal: 0 30px 80px rgba(18, 18, 18, 0.12);
+  --shadow-gold-glow:
+    0 0 0 1px rgba(212, 175, 55, 0.3), 0 8px 24px rgba(212, 175, 55, 0.18);
+
+  /* Motion — luxury easing */
+  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-luxury-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-luxury-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Durations */
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-slow: 540ms;
+  --duration-luxury: 800ms;
+}
+
+/* =============================================================================
+ * :root — Light mode (default). Aura Living is primarily a light theme brand.
+ * ========================================================================== */
+:root {
+  /* --- Font families (set by next/font CSS variables) --------------------- */
+  --font-inter: var(--font-sans);
+  --font-playfair: var(--font-serif);
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  /* --- Aura Living brand palette ----------------------------------------- */
+  --background: #ffffff; /* Pure White — main canvas */
+  --surface: #faf8f4; /* Warm Soft Cream — sections, cards */
+  --cream: #faf8f4; /* alias */
+  --cream-warm: #fdfbf7; /* warmer cream — hover, modal overlay tint */
+  --foreground: #121212; /* Deep Black — primary text */
+  --ink: #121212; /* alias */
+  --gold: #d4af37; /* Luxury Gold — primary CTAs, accents */
+  --gold-soft: #e8c971; /* hover gold — lighter */
+  --gold-deep: #b8962e; /* active gold — darker */
+  --muted: #8e8e8e; /* Soft Gray — secondary text */
+  --muted-foreground: #8e8e8e;
+  --stone: #6b6b6b; /* tertiary text */
+  --line: #ebe9e4; /* hairline border — soft warm gray */
+  --outline: #c4c7c7;
+
+  /* --- shadcn bridge (kept for component compatibility) ----------------- */
+  --card: #ffffff;
+  --card-foreground: #121212;
+  --popover: #ffffff;
+  --popover-foreground: #121212;
+  --primary: #121212; /* shadcn primary → deep black */
+  --primary-foreground: #ffffff;
+  --secondary: #faf8f4;
+  --secondary-foreground: #121212;
+  --accent: #faf8f4; /* shadcn accent → cream (NOT gold) */
+  --accent-foreground: #121212;
+  --destructive: #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border: #ebe9e4;
+  --input: #ebe9e4;
+  --ring: #d4af37; /* focus ring = gold */
+
+  /* --- Typography scale (fluid via clamp) ------------------------------- */
+  /* Display — Playfair Display, tight kerning */
+  --text-display-xl-value: clamp(2.75rem, 1.5rem + 5vw, 4.5rem); /* 44→72 */
+  --text-display-lg-value: clamp(2.5rem, 1.5rem + 4vw, 4rem); /* 40→64 */
+  --text-display-md-value: clamp(2rem, 1.2rem + 3vw, 2.75rem); /* 32→44 */
+
+  /* Headline — Playfair Display */
+  --text-headline-lg-value: clamp(1.75rem, 1.1rem + 2.5vw, 2.25rem); /* 28→36 */
+  --text-headline-md-value: clamp(1.5rem, 1rem + 2vw, 2rem); /* 24→32 */
+  --text-headline-sm-value: clamp(1.25rem, 0.95rem + 1.2vw, 1.5rem); /* 20→24 */
+
+  /* Body — Inter */
+  --text-body-lg-value: 1.125rem; /* 18 */
+  --text-body-md-value: 1rem; /* 16 */
+  --text-body-sm-value: 0.875rem; /* 14 */
+
+  /* Label-caps — Inter, uppercase, tracked */
+  --text-label-caps-value: 0.75rem; /* 12 */
+
+  /* --- Container widths -------------------------------------------------- */
+  --container-max: 1440px;
+  --gutter: 2rem; /* 32px */
+  --margin-desktop: 4rem; /* 64px */
+  --margin-tablet: 2rem; /* 32px */
+  --margin-mobile: 1.25rem; /* 20px */
+  --stack-xl: 7.5rem; /* 120px */
+  --stack-lg: 5rem; /* 80px */
+  --stack-md: 4rem; /* 64px */
+  --stack-sm: 2rem; /* 32px */
+
+  /* --- shadcn legacy radius (overridden above) -------------------------- */
+  --radius: 0.25rem;
+
+  /* --- shadcn legacy chart colors (kept for compatibility) ------------- */
+  --chart-1: #d4af37; /* gold */
+  --chart-2: #121212; /* ink */
+  --chart-3: #8e8e8e; /* stone */
+  --chart-4: #b8962e; /* gold-deep */
+  --chart-5: #ebe9e4; /* line */
+}
+
+/* =============================================================================
+ * .dark — Reserved dark mode tokens (design spec is light-first; dark mode
+ * is a future enhancement). Kept here so the theme switch infrastructure works.
+ * ========================================================================== */
+.dark {
+  --background: #0f0f0f;
+  --surface: #1a1a1a;
+  --cream: #1a1a1a;
+  --cream-warm: #1f1f1f;
+  --foreground: #faf8f4;
+  --ink: #faf8f4;
+  --gold: #e8c971; /* brighter gold for dark bg */
+  --gold-soft: #f0d68f;
+  --gold-deep: #d4af37;
+  --muted: #888888;
+  --muted-foreground: #888888;
+  --stone: #a8a8a8;
+  --line: #2a2a2a;
+  --outline: #3a3a3a;
+
+  --card: #1a1a1a;
+  --card-foreground: #faf8f4;
+  --popover: #1a1a1a;
+  --popover-foreground: #faf8f4;
+  --primary: #faf8f4;
+  --primary-foreground: #121212;
+  --secondary: #2a2a2a;
+  --secondary-foreground: #faf8f4;
+  --accent: #2a2a2a;
+  --accent-foreground: #faf8f4;
+  --destructive: #ff6b6b;
+  --destructive-foreground: #faf8f4;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #e8c971;
+
+  --chart-1: #e8c971;
+  --chart-2: #faf8f4;
+  --chart-3: #888888;
+  --chart-4: #d4af37;
+  --chart-5: #2a2a2a;
+}
+
+/* =============================================================================
+ * @layer base — global element defaults
+ * ========================================================================== */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body-md-value);
+    line-height: 1.6;
+    font-feature-settings: "kern", "liga", "calt";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings — Playfair Display, refined kerning */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+  }
+
+  h1 {
+    font-size: var(--text-display-lg-value);
+    font-weight: 500;
+  }
+
+  h2 {
+    font-size: var(--text-headline-md-value);
+  }
+
+  h3 {
+    font-size: var(--text-headline-sm-value);
+  }
+
+  /* Selection — gold tint */
+  ::selection {
+    background-color: rgba(212, 175, 55, 0.22);
+    color: var(--foreground);
+  }
+
+  /* Focus ring — gold, refined */
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Custom scrollbar — discreet, luxury */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Links — subtle, no underline by default */
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-luxury);
+  }
+}
+
+/* =============================================================================
+ * @layer components — luxury composite utilities
+ * ========================================================================== */
+@layer components {
+  /* --- Container: max-width + responsive outer margin ------------------- */
+  .container-luxury {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--margin-mobile);
+  }
+  @media (min-width: 768px) {
+    .container-luxury {
+      padding-inline: var(--margin-tablet);
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-luxury {
+      padding-inline: var(--margin-desktop);
+    }
+  }
+
+  /* --- Eyebrow / Label Caps — tracked uppercase Inter ------------------- */
+  .label-caps {
+    font-family: var(--font-sans);
+    font-size: var(--text-label-caps-value);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* --- Buttons: primary (Deep Black) ------------------------------------ */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background-color: var(--ink);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: var(--text-label-caps-value);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: var(--radius-md);
+    transition: all var(--duration-base) var(--ease-luxury);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-primary:hover {
+    background-color: #2a2a2a;
+    transform: translateY(-1px);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* --- Buttons: gold CTA (used only for Add-to-Cart / Buy-Now) ---------- */
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background-color: var(--gold);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-label-caps-value);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: var(--radius-md);
+    transition: all var(--duration-base) var(--ease-luxury);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-gold:hover {
+    background-color: var(--gold-soft);
+    box-shadow: var(--shadow-gold-glow);
+    transform: translateY(-1px);
+  }
+  .btn-gold:active {
+    background-color: var(--gold-deep);
+    transform: translateY(0);
+  }
+  .btn-gold:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* --- Buttons: ghost underline (text links in nav) --------------------- */
+  .btn-underline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-body-sm-value);
+    font-weight: 500;
+    color: var(--foreground);
+    position: relative;
+    padding-bottom: 2px;
+    transition: color var(--duration-fast) var(--ease-luxury);
+  }
+  .btn-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--gold);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--duration-base) var(--ease-luxury);
+  }
+  .btn-underline:hover {
+    color: var(--ink);
+  }
+  .btn-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* --- Inputs: underline style (per DESIGN.md) -------------------------- */
+  .input-underline {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 0.75rem 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-body-md-value);
+    color: var(--foreground);
+    transition: border-color var(--duration-base) var(--ease-luxury);
+    border-radius: 0;
+  }
+  .input-underline:focus {
+    outline: none;
+    border-bottom-color: var(--ink);
+  }
+  .input-underline::placeholder {
+    color: var(--muted);
+  }
+
+  /* --- Chips: pill-shaped, cream bg, ink text --------------------------- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    background-color: var(--cream-warm);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body-sm-value);
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line);
+    transition: all var(--duration-fast) var(--ease-luxury);
+    cursor: pointer;
+  }
+  .chip:hover {
+    border-color: var(--ink);
+  }
+  .chip[data-selected="true"] {
+    background-color: var(--ink);
+    color: #ffffff;
+    border-color: var(--ink);
+  }
+
+  /* --- Section spacing utility ------------------------------------------ */
+  .section-xl {
+    padding-block: var(--stack-xl);
+  }
+  .section-md {
+    padding-block: var(--stack-md);
+  }
+
+  /* --- Glassmorphic header backdrop ------------------------------------- */
+  .glassmorphic {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(18, 18, 18, 0.05);
+  }
+
+  /* --- Modal overlay (cream-tinted) ------------------------------------- */
+  .modal-overlay {
+    background-color: rgba(253, 251, 247, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* --- Typography utility classes (Playfair Display headings) ----------- */
+  .text-display-xl {
+    font-family: var(--font-serif);
+    font-size: var(--text-display-xl-value);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+  .text-display-lg {
+    font-family: var(--font-serif);
+    font-size: var(--text-display-lg-value);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .text-display-md {
+    font-family: var(--font-serif);
+    font-size: var(--text-display-md-value);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .text-headline-lg {
+    font-family: var(--font-serif);
+    font-size: var(--text-headline-lg-value);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+  .text-headline-md {
+    font-family: var(--font-serif);
+    font-size: var(--text-headline-md-value);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .text-headline-sm {
+    font-family: var(--font-serif);
+    font-size: var(--text-headline-sm-value);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .text-body-lg {
+    font-family: var(--font-sans);
+    font-size: var(--text-body-lg-value);
+    line-height: 1.6;
+  }
+  .text-body-md {
+    font-family: var(--font-sans);
+    font-size: var(--text-body-md-value);
+    line-height: 1.6;
+  }
+  .text-body-sm {
+    font-family: var(--font-sans);
+    font-size: var(--text-body-sm-value);
+    line-height: 1.5;
+  }
+
+  /* --- Truncation helpers ---------------------------------------------- */
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
+
+/* =============================================================================
+ * @layer utilities — single-purpose helpers
+ * ========================================================================== */
+@layer utilities {
+  /* Hide scrollbar (for horizontal carousels) */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Aspect ratio for product imagery (sharp corners, no rounding) */
+  .aspect-product {
+    aspect-ratio: 4 / 5;
+  }
+  .aspect-editorial {
+    aspect-ratio: 3 / 4;
+  }
+  .aspect-lookbook {
+    aspect-ratio: 16 / 11;
+  }
+}

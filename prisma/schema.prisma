@@ -1,0 +1,139 @@
+// =============================================================================
+// Aura Living — Prisma Schema
+// Database: Supabase Postgres (pooler for runtime, direct for migrations)
+// =============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  // Enable Postgres-specific extensions for FTS, JSON ops, etc.
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  // Postgres extensions we'll use in Phase 2 for full-text search.
+  extensions = [pg_trgm, unaccent]
+}
+
+// -----------------------------------------------------------------------------
+// Phase 1 — Core models (User, Category, Product, Order, OrderItem)
+// Phase 2 will expand: ProductVariant, Review, Cart, Wishlist, Address, Coupon
+// =============================================================================
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  TRADE
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+  DISCONTINUED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String      @id @default(cuid())
+  slug      String      @unique
+  name      String
+  parentId  String?
+  parent    Category?   @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[]  @relation("CategoryTree")
+  imageUrl  String?
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String          @id @default(cuid())
+  slug             String          @unique
+  name             String
+  description      String
+  basePrice        Decimal         @db.Decimal(10, 2)
+  currency         String          @default("PKR")
+  status           ProductStatus   @default(DRAFT)
+  categoryId       String?
+  category         Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images           String[]
+  materials        String[]
+  dimensions       String?
+  careInstructions String?
+  isFeatured       Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([isFeatured])
+  @@map("products")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status          OrderStatus @default(PENDING)
+  subtotal        Decimal     @db.Decimal(10, 2)
+  shipping        Decimal     @db.Decimal(10, 2) @default(0)
+  tax             Decimal     @db.Decimal(10, 2) @default(0)
+  total           Decimal     @db.Decimal(10, 2)
+  currency        String      @default("PKR")
+  shippingAddress Json
+  billingAddress  Json
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  totalPrice Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}

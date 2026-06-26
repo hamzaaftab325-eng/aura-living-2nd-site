@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# Husky pre-commit hook — runs lint-staged on staged files.
+# Files: only what's staged (fast). Errors block the commit.
+
+echo "[pre-commit] Running lint-staged on staged files..."
+npx lint-staged
