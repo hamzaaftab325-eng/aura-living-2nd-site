@@ -36,9 +36,13 @@ type RevealVariant =
   | "down"
   | "fade-down"
   | "left"
+  | "fade-left"
   | "right"
+  | "fade-right"
   | "scale"
-  | "blur";
+  | "blur"
+  | "blur-up"
+  | "blur-scale";
 
 interface RevealOnScrollProps {
   children: ReactNode;
@@ -62,9 +66,13 @@ const offsetMap: Record<
   down: { y: -24 },
   "fade-down": { y: -24 },
   left: { x: -32 },
+  "fade-left": { x: -32 },
   right: { x: 32 },
+  "fade-right": { x: 32 },
   scale: { scale: 0.96 },
   blur: { filter: "blur(10px)" },
+  "blur-up": { y: 24, filter: "blur(10px)" },
+  "blur-scale": { scale: 0.96, filter: "blur(10px)" },
 };
 
 export function RevealOnScroll({
