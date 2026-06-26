@@ -123,10 +123,7 @@ export default async function HomePage() {
                 <CategoryCard
                   name={cat.name}
                   count={cat._count.products}
-                  image={
-                    cat.imageUrl ??
-                    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
-                  }
+                  image={cat.imageUrl ?? "/images/hero-1.png"}
                   href={`/shop/${cat.slug}`}
                 />
               </StaggerItem>
@@ -170,10 +167,7 @@ export default async function HomePage() {
                   <ProductCard
                     name={product.name}
                     price={Number(product.basePrice)}
-                    image={
-                      product.images[0] ??
-                      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
-                    }
+                    image={product.images[0] ?? "/images/hero-1.png"}
                     alternateImage={product.images[1]}
                     badge={product.isFeatured ? "New" : undefined}
                     category={product.category?.name}
@@ -205,7 +199,7 @@ export default async function HomePage() {
       <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-[var(--ink)]">
         <div className="absolute inset-0">
           <ImageReveal
-            src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=1920&q=90"
+            src="/images/editorial-banner.png"
             alt="Editorial atelier interior"
             direction="up"
             duration={1.5}
@@ -389,7 +383,7 @@ export default async function HomePage() {
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center lg:gap-20">
             <BlurReveal variant="blur-scale" amount={0.3}>
               <ImageReveal
-                src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=900&q=80"
+                src="/images/atelier-story.png"
                 alt="Artisan crafting decor"
                 direction="left"
                 containerClassName="aspect-[4/5] rounded-[0.375rem] overflow-hidden"
@@ -505,11 +499,11 @@ export default async function HomePage() {
           <InstagramGrid
             handle="auraliving.pk"
             images={[
-              "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80",
-              "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80",
-              "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=600&q=80",
-              "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&q=80",
-              "https://images.unsplash.com/photo-1600369671236-e74521d4b6ad?w=600&q=80",
+              "/images/hero-1.png",
+              "/images/hero-2.png",
+              "/images/atelier-story.png",
+              "/images/cat-tables.png",
+              "/images/cat-textiles.png",
             ]}
           />
         </Container>

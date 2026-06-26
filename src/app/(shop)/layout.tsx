@@ -59,8 +59,7 @@ export default function ShopLayout({ children }: { children: ReactNode }) {
               title: "The Autumn Edit",
               subtitle: "New Collection",
               href: "/shop",
-              image:
-                "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80",
+              image: "/images/hero-1.png",
             }}
           />
           <Button variant="underline" asChild>

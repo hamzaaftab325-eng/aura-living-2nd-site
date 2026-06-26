@@ -16,12 +16,7 @@ export function ProductGallery({
   alt: string;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const imagesList =
-    images.length > 0
-      ? images
-      : [
-          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=900&q=80",
-        ];
+  const imagesList = images.length > 0 ? images : ["/images/hero-1.png"];
 
   return (
     <div className="flex flex-col gap-4">

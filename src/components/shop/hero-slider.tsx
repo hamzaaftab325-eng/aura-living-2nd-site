@@ -39,8 +39,7 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    image:
-      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1920&q=90",
+    image: "/images/hero-1.png",
     eyebrow: "Autumn Collection — 2026",
     title: "Curated calm\nfor considered\nliving.",
     description:
@@ -48,8 +47,7 @@ const SLIDES: Slide[] = [
     cta: { label: "Shop the Collection", href: "/shop", variant: "primary" },
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1920&q=90",
+    image: "/images/hero-2.png",
     eyebrow: "The Atelier",
     title: "Where every\nobject earns\nits place.",
     description:
@@ -61,8 +59,7 @@ const SLIDES: Slide[] = [
     },
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=1920&q=90",
+    image: "/images/hero-3.png",
     eyebrow: "Featured Piece",
     title: "Crafted\nwith\nintention.",
     description:

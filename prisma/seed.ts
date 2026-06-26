@@ -29,57 +29,49 @@ const CATEGORIES = [
     slug: "lighting",
     name: "Lighting",
     sortOrder: 1,
-    imageUrl:
-      "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&q=80",
+    imageUrl: "/images/cat-lighting.png",
   },
   {
     slug: "seating",
     name: "Seating",
     sortOrder: 2,
-    imageUrl:
-      "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=600&q=80",
+    imageUrl: "/images/cat-seating.png",
   },
   {
     slug: "tables",
     name: "Tables",
     sortOrder: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&q=80",
+    imageUrl: "/images/cat-tables.png",
   },
   {
     slug: "storage",
     name: "Storage",
     sortOrder: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
+    imageUrl: "/images/cat-storage.png",
   },
   {
     slug: "textiles",
     name: "Textiles",
     sortOrder: 5,
-    imageUrl:
-      "https://images.unsplash.com/photo-1600369671236-e74521d4b6ad?w=600&q=80",
+    imageUrl: "/images/cat-textiles.png",
   },
   {
     slug: "decor",
     name: "Decor",
     sortOrder: 6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=600&q=80",
+    imageUrl: "/images/cat-decor.png",
   },
   {
     slug: "mirrors",
     name: "Mirrors",
     sortOrder: 7,
-    imageUrl:
-      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=600&q=80",
+    imageUrl: "/images/cat-mirrors.png",
   },
   {
     slug: "outdoor",
     name: "Outdoor",
     sortOrder: 8,
-    imageUrl:
-      "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=600&q=80",
+    imageUrl: "/images/cat-outdoor.png",
   },
 ];
 

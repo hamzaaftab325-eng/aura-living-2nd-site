@@ -37,7 +37,7 @@ export default async function ShopPage() {
   return (
     <>
       <PageHero
-        image="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1920&q=90"
+        image="/images/shop-hero.png"
         eyebrow="The Collection"
         title="All Products"
         description={`${products.length} curated pieces — each selected for craftsmanship, material integrity, and quiet presence.`}
@@ -69,10 +69,7 @@ export default async function ShopPage() {
                   <ProductCard
                     name={product.name}
                     price={Number(product.basePrice)}
-                    image={
-                      product.images[0] ??
-                      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
-                    }
+                    image={product.images[0] ?? "/images/hero-1.png"}
                     alternateImage={product.images[1]}
                     category={product.category?.name}
                     badge={product.isFeatured ? "New" : undefined}

@@ -763,8 +763,8 @@ body {
 - Mixed dark + light pages → `body { background: <darkest page color> }` (dark edges on white pages are invisible; white edges on dark pages are the bug we're fixing)
 - All pages white/light → `body { background: <lightest content bg> }` (e.g. `#f8fafc`)
 
-  0.5. **No overflow:hidden + Browser Preview Adaptive Scaling (MANDATORY)**:
-  For fixed-size single-page designs (posters, infographics, certificates, etc.), **absolutely never** set `overflow: hidden` on `html`, `body`, or the main container. Reasons:
+0.5. **No overflow:hidden + Browser Preview Adaptive Scaling (MANDATORY)**:
+For fixed-size single-page designs (posters, infographics, certificates, etc.), **absolutely never** set `overflow: hidden` on `html`, `body`, or the main container. Reasons:
 
 - When opening the HTML directly in a browser, the viewport is much smaller than the design size (e.g., a 1400px-tall page in a 900px viewport). `overflow: hidden` clips the bottom content and prevents scrolling.
 - `html2pdf-next.js`'s pre-render check detects `scrollHeight > clientHeight` + `overflow: hidden` and triggers auto-fix (force-expanding the container), which may break the layout.

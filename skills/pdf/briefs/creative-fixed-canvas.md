@@ -774,8 +774,8 @@ body {
 - Mixed dark + light pages → `body { background: <darkest page color> }` (dark edges on white pages are invisible; white edges on dark pages are the bug we're fixing)
 - All pages white/light → `body { background: <lightest content bg> }` (e.g. `#f8fafc`)
 
-  0.5. **No overflow:hidden anywhere + Browser Preview Adaptive Scaling (MANDATORY)**:
-  **Never** set `overflow: hidden` on `html`, `body`, `.page`, or any container. Reasons:
+0.5. **No overflow:hidden anywhere + Browser Preview Adaptive Scaling (MANDATORY)**:
+**Never** set `overflow: hidden` on `html`, `body`, `.page`, or any container. Reasons:
 
 - It silently clips content that slightly exceeds bounds, making layout bugs invisible.
 - `html2pdf-next.js`'s pre-render check detects `scrollHeight > clientHeight` + `overflow: hidden` and triggers auto-fix (force-expanding the container), which may break the layout.

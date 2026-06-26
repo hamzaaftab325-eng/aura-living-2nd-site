@@ -163,8 +163,7 @@ Gather facts and visual assets.
 
 Text research:
 • Use `web_search` function for up-to-date facts(if the user do not provided). Batch 2-3 queries across parallel calls in one turn.
-
-````bash # Simple search query
+```bash # Simple search query
 z-ai function --name "web_search" --args '{"query": "artificial intelligence","num": 3}'
 
     # Using short options
@@ -195,16 +194,14 @@ You should first create a directory '<work_dir>/slides' to keep the produced fil
 
 Final on-disk layout after Stage 3:
 
-````
-
+```
 <work_dir>/slides/
 ├── global.css
 ├── slides_brief.json
-├── slide_01.html ← written in Stage 4 by sub-agents
+├── slide_01.html        ← written in Stage 4 by sub-agents
 ├── slide_02.html
 └── ...
-
-````
+```
 
 1. `<work_dir>/slides/global.css` — the deck-wide stylesheet that EVERY slide will `<link>` into its `<head>`. Bake in:
    • You must use the font size /font style/color in the global.css, do not redefine it in each html
@@ -246,20 +243,19 @@ Final on-disk layout after Stage 3:
        ...
      ]
    }
-````
-
-• Slide ORDER is the order of entries in the `slides` array — no `position` / index field. To reorder a deck, reorder the list.
-• Every slide MUST have `title`, `layout`, `output_path`, `task_brief`.
-• `output_path` is the ABSOLUTE path the slide HTML will be written to. Filenames are arbitrary stable identifiers (e.g. `slide_01.html`, `slide_02.html` at first creation) — they live in the same directory as `global.css` and `slides_brief.json`, but their alphabetical order does NOT define slide order. Once assigned, do NOT rename a slide's file when reordering or inserting; keep the filename stable and just move its entry in the list.
-• `layout` MUST be chosen per page from a coherent catalog (cover, section header, key message, bento grid, split text+image, timeline, stats, comparison, quote, closing, etc.). Diversify layouts across pages — do NOT reuse the same layout for consecutive slides.
-• Section structure for longer decks: once the deck gets long (roughly **≥10 pages**), split the body into 2–5 named chapters with a `section header` page at the start of each. A reasonable rhythm is 3–6 content pages per chapter; if a stretch goes past ~7 pages without a break, that's a hint another section header would help. Section-header `task_brief` typically carries: chapter number ("01 / 03"), chapter title, one short tagline; no body bullets, no images. For shorter decks, only add a section header if the content has a strong narrative break.
-• `task_brief` is the SOLE input the sub-agent will see for that slide — it MUST be self-contained for the renderer.
-– Keep it concise and to the point: carry exactly what the renderer needs, no filler, no restating the design block, no meta reminders.
-– Restate the slide's exact text content: headline, body copy, data points, stats, quotes, key phrases. Copy verbatim — do not paraphrase loosely.
-– Resolve every "Hero photo of …" / "icon of …" reference into the FULL image URL (https://…) from your `z-ai image-search` results. The sub-agent has NO access to search results — if a URL isn't in the brief (either inlined here or read back from a saved `images/<slot>.json` manifest), the slide can't display the image.
-– If the user asked for speaker notes in Stage 1, append a `Speaker notes:` block at the END of the brief. write the notes request. do NOT write notes verbatim here. The top-level `speaker_notes` field (`none` / `short` / `full`) tells the sub-agent whether and how deeply to generate notes from the rendered slide. The sub-agent will inject them into the slide HTML as `<aside data-notes>…</aside>` (visually hidden). If the user did NOT request notes, omit this block — do not invent notes.
-– Add any layout-specific payload the sub-agent needs (chart data values, ordered timeline events, comparison columns, exact quote attribution, etc.). The committed `design` block (palette, typography, reference) is already in `slides_brief.json`, so do NOT repeat it inside each `task_brief`.
-– Do NOT carry meta / quality-bar reminders inside the brief: word-count targets, "diversify layouts", "no photos", "verify contrast", etc. Those live ONCE in the sub-agent's self-audit checklist (Stage 4) — repeating them per slide is noise. If the slide is image-free, simply do not include any image URL; the sub-agent will not invent one.
+   ```
+   • Slide ORDER is the order of entries in the `slides` array — no `position` / index field. To reorder a deck, reorder the list.
+   • Every slide MUST have `title`, `layout`, `output_path`, `task_brief`.
+   • `output_path` is the ABSOLUTE path the slide HTML will be written to. Filenames are arbitrary stable identifiers (e.g. `slide_01.html`, `slide_02.html` at first creation) — they live in the same directory as `global.css` and `slides_brief.json`, but their alphabetical order does NOT define slide order. Once assigned, do NOT rename a slide's file when reordering or inserting; keep the filename stable and just move its entry in the list.
+   • `layout` MUST be chosen per page from a coherent catalog (cover, section header, key message, bento grid, split text+image, timeline, stats, comparison, quote, closing, etc.). Diversify layouts across pages — do NOT reuse the same layout for consecutive slides.
+   • Section structure for longer decks: once the deck gets long (roughly **≥10 pages**), split the body into 2–5 named chapters with a `section header` page at the start of each. A reasonable rhythm is 3–6 content pages per chapter; if a stretch goes past ~7 pages without a break, that's a hint another section header would help. Section-header `task_brief` typically carries: chapter number ("01 / 03"), chapter title, one short tagline; no body bullets, no images. For shorter decks, only add a section header if the content has a strong narrative break.
+   • `task_brief` is the SOLE input the sub-agent will see for that slide — it MUST be self-contained for the renderer.
+   – Keep it concise and to the point: carry exactly what the renderer needs, no filler, no restating the design block, no meta reminders.
+   – Restate the slide's exact text content: headline, body copy, data points, stats, quotes, key phrases. Copy verbatim — do not paraphrase loosely.
+   – Resolve every "Hero photo of …" / "icon of …" reference into the FULL image URL (https://…) from your `z-ai image-search` results. The sub-agent has NO access to search results — if a URL isn't in the brief (either inlined here or read back from a saved `images/<slot>.json` manifest), the slide can't display the image.
+   – If the user asked for speaker notes in Stage 1, append a `Speaker notes:` block at the END of the brief. write the notes request. do NOT write notes verbatim here. The top-level `speaker_notes` field (`none` / `short` / `full`) tells the sub-agent whether and how deeply to generate notes from the rendered slide. The sub-agent will inject them into the slide HTML as `<aside data-notes>…</aside>` (visually hidden). If the user did NOT request notes, omit this block — do not invent notes.
+   – Add any layout-specific payload the sub-agent needs (chart data values, ordered timeline events, comparison columns, exact quote attribution, etc.). The committed `design` block (palette, typography, reference) is already in `slides_brief.json`, so do NOT repeat it inside each `task_brief`.
+   – Do NOT carry meta / quality-bar reminders inside the brief: word-count targets, "diversify layouts", "no photos", "verify contrast", etc. Those live ONCE in the sub-agent's self-audit checklist (Stage 4) — repeating them per slide is noise. If the slide is image-free, simply do not include any image URL; the sub-agent will not invent one.
 
 ═══════════════════════════════════════════════════════════════════════
 STAGE 4 — BUILD ( FAN OUT `Agent` sub-agents to actually write the slides)

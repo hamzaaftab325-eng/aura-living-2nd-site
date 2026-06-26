@@ -56,10 +56,7 @@ export default async function CategoryPage({ params }: PageProps) {
   return (
     <>
       <PageHero
-        image={
-          category.imageUrl ??
-          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1920&q=90"
-        }
+        image={category.imageUrl ?? "/images/shop-hero.png"}
         eyebrow="Collection"
         title={category.name}
         description={`${products.length} ${products.length === 1 ? "piece" : "pieces"} — crafted for considered living.`}
@@ -96,10 +93,7 @@ export default async function CategoryPage({ params }: PageProps) {
                   <ProductCard
                     name={product.name}
                     price={Number(product.basePrice)}
-                    image={
-                      product.images[0] ??
-                      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
-                    }
+                    image={product.images[0] ?? "/images/hero-1.png"}
                     alternateImage={product.images[1]}
                     category={product.category?.name}
                     badge={product.isFeatured ? "Bestseller" : undefined}
