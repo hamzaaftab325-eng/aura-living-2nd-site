@@ -70,12 +70,19 @@ model User {
 }
 
 // Better Auth: stores credentials (email/password) + future OAuth providers
+// HUMAN-READABLE: `email` column is denormalized from User.email for easy
+// raw-table inspection in Supabase Studio (so you see "admin@auraliving.pk"
+// instead of just "VdrzGXwIJKI898O6mNAebMP9Sqt2mCGt").
+// Nullable because Better Auth creates the row first, then we backfill via
+// the `after` hook in src/server/auth/config.ts.
 model Account {
   id                    String    @id @unique
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accountId             String
   providerId            String
+  // Denormalized for human readability — populated by databaseHooks.account.create.after
+  email                 String?
   accessToken           String?
   refreshToken          String?
   accessTokenExpiresAt  DateTime?
@@ -88,15 +95,20 @@ model Account {
 
   @@unique([providerId, accountId])
   @@index([userId])
+  @@index([email])
   @@map("accounts")
 }
 
 // Better Auth: JWT sessions
+// HUMAN-READABLE: `userEmail` column is denormalized for raw-table inspection.
+// Nullable — populated by databaseHooks.session.create.after.
 model Session {
   id        String   @id @unique
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
+  // Denormalized for human readability — populated by databaseHooks.session.create.after
+  userEmail String?
   expiresAt DateTime
   ipAddress String?
   userAgent String?
@@ -104,6 +116,7 @@ model Session {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+  @@index([userEmail])
   @@map("sessions")
 }
 
@@ -167,6 +180,8 @@ model Order {
   id              String      @id @default(cuid())
   userId          String
   user            User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  // Denormalized for human readability — populated at order creation
+  userEmail       String?
   status          OrderStatus @default(PENDING)
   subtotal        Decimal     @db.Decimal(10, 2)
   shipping        Decimal     @db.Decimal(10, 2) @default(0)
@@ -182,18 +197,22 @@ model Order {
 
   @@index([userId])
   @@index([status])
+  @@index([userEmail])
   @@map("orders")
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
-  quantity  Int
-  unitPrice Decimal @db.Decimal(10, 2)
-  totalPrice Decimal @db.Decimal(10, 2)
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  // Denormalized for human readability — snapshot at order creation
+  productName String?
+  productSlug String?
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2)
+  totalPrice  Decimal @db.Decimal(10, 2)
 
   @@index([orderId])
   @@index([productId])

@@ -47,5 +47,12 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "skills", "examples", "mini-services"]
+  "exclude": [
+    "node_modules",
+    "skills",
+    "examples",
+    "mini-services",
+    "scripts",
+    "prisma"
+  ]
 }

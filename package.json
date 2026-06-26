@@ -18,6 +18,7 @@
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
     "db:seed": "bun run prisma/seed.ts",
+    "postinstall": "prisma generate",
     "prepare": "husky"
   },
   "dependencies": {

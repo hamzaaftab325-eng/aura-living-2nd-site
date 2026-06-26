@@ -27,6 +27,47 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
+  // Database hooks — populate denormalized human-readable columns
+  // (Account.email + Session.userEmail) AFTER creation.
+  // We use `after` (not `before`) because Better Auth's internal create
+  // call rejects unknown fields. After the row is created, we UPDATE it
+  // with the denormalized email so raw-table inspection in Supabase Studio
+  // shows "admin@auraliving.pk" instead of just "VdrzGXwIJKI898O6mNAebMP9Sqt2mCGt".
+  databaseHooks: {
+    account: {
+      create: {
+        after: async (account) => {
+          const user = await prismaClient.user.findUnique({
+            where: { id: account.userId },
+            select: { email: true },
+          });
+          if (user?.email) {
+            await prismaClient.account.update({
+              where: { id: account.id },
+              data: { email: user.email },
+            });
+          }
+        },
+      },
+    },
+    session: {
+      create: {
+        after: async (session) => {
+          const user = await prismaClient.user.findUnique({
+            where: { id: session.userId },
+            select: { email: true },
+          });
+          if (user?.email) {
+            await prismaClient.session.update({
+              where: { id: session.id },
+              data: { userEmail: user.email },
+            });
+          }
+        },
+      },
+    },
+  },
+
   // Email/password only (Google OAuth deferred — free tier)
   emailAndPassword: {
     enabled: true,
