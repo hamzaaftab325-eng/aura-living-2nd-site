@@ -271,6 +271,7 @@ export default async function ProductPage({ params }: PageProps) {
                       image={p.images[0] ?? ""}
                       alternateImage={p.images[1]}
                       category={p.category?.name}
+                      href={`/product/${p.slug}`}
                     />
                   </StaggerItem>
                 ))}

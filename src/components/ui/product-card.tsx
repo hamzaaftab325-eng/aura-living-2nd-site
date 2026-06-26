@@ -40,10 +40,10 @@ export interface ProductCardProps {
   imageAlt?: string;
   badge?: "New" | "Bestseller" | "Limited" | "Sale";
   category?: string;
+  href?: string;
   onAddToCart?: () => void;
   onWishlistToggle?: (wished: boolean) => void;
   onQuickView?: () => void;
-  onClick?: () => void;
   className?: string;
   priority?: boolean;
 }
@@ -76,10 +76,10 @@ export function ProductCard({
   imageAlt = "",
   badge,
   category,
+  href,
   onAddToCart,
   onWishlistToggle,
   onQuickView,
-  onClick,
   className,
   priority,
 }: ProductCardProps) {
@@ -106,12 +106,19 @@ export function ProductCard({
 
   return (
     <motion.article
-      onClick={onClick}
       whileHover="hover"
       data-cursor="view"
       data-cursor-text="View"
       className={cn("group relative flex cursor-pointer flex-col", className)}
     >
+      {/* Link wrapper for navigation */}
+      {href && (
+        <a
+          href={href}
+          className="absolute inset-0 z-10"
+          aria-label={`View ${name}`}
+        />
+      )}
       {/* Image area — 85% of card */}
       <div className="aspect-product relative overflow-hidden bg-[var(--cream)]">
         {/* Primary image */}

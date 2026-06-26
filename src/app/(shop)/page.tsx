@@ -1,8 +1,6 @@
 /**
- * Aura Living — Home Page (Server Component)
- *
- * Pulls real products + categories from Supabase Postgres.
- * All animations handled by client components (ProductCard, SplitHeading, etc.)
+ * Aura Living — Home Page
+ * Full-bleed hero slider + real DB products + editorial sections.
  */
 
 import {
@@ -14,13 +12,11 @@ import {
 import {
   RevealOnScroll,
   BlurReveal,
-  WordReveal,
   SplitHeading,
   ImageReveal,
   StaggerContainer,
   StaggerItem,
   ScrollProgress,
-  ScrollIndicator,
   Marquee,
   Counter,
   DrawLine,
@@ -35,6 +31,7 @@ import {
   FAQAccordion,
   InstagramGrid,
 } from "@/components/ui";
+import { HeroSlider } from "@/components/shop/hero-slider";
 import {
   getFeaturedProducts,
   getNewArrivals,
@@ -51,10 +48,8 @@ import {
   Ruler,
   Leaf,
 } from "lucide-react";
-import { formatPrice } from "@/lib/format";
 
 export default async function HomePage() {
-  // Fetch real data from DB (sequential — Supabase free tier = 1 connection)
   const featuredProducts = await getFeaturedProducts(8);
   const newArrivals = await getNewArrivals(4);
   const categories = await getAllCategories();
@@ -64,122 +59,12 @@ export default async function HomePage() {
       <ScrollProgress />
 
       {/* ===============================================================
-       * Hero
+       * 1. Hero Slider — full-bleed, auto-advancing
        * ============================================================= */}
-      <Section spacing="xl" tone="default" id="top" bare>
-        <Container className="relative">
-          <FloatingElement
-            className="absolute top-[20%] right-[10%] hidden lg:block"
-            floatSpeed="slow"
-          >
-            <Sparkles
-              className="h-6 w-6 text-[var(--gold)] opacity-40"
-              strokeWidth={0.75}
-            />
-          </FloatingElement>
-
-          <div className="grid gap-16 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-20">
-            <div className="flex flex-col gap-8">
-              <RevealOnScroll variant="fade" amount={0.6}>
-                <div className="flex items-center gap-3">
-                  <span className="h-px w-8 bg-[var(--gold)]" aria-hidden />
-                  <Eyebrow tone="gold">Autumn Collection — 2026</Eyebrow>
-                </div>
-              </RevealOnScroll>
-
-              <SplitHeading
-                text={"Curated calm\nfor considered\nliving."}
-                className="text-display-xl font-medium text-[var(--ink)]"
-                stagger={0.12}
-                delay={0.2}
-              />
-
-              <RevealOnScroll variant="fade-up" delay={0.7} amount={0.4}>
-                <p className="text-body-lg max-w-[48ch] text-[var(--stone)]">
-                  A refined collection of home decor — selected for
-                  craftsmanship, material integrity, and quiet presence.
-                  Designed in Lahore, crafted for the discerning Pakistani home.
-                </p>
-              </RevealOnScroll>
-
-              <RevealOnScroll variant="fade-up" delay={0.85} amount={0.4}>
-                <div className="flex flex-wrap gap-4 pt-2">
-                  <Button variant="primary" size="lg" asChild>
-                    <a href="/shop" data-cursor="text" data-cursor-text="Shop">
-                      Shop the Collection
-                      <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
-                    </a>
-                  </Button>
-                  <Button variant="outline-luxury" size="lg" asChild>
-                    <a
-                      href="#atelier"
-                      data-cursor="text"
-                      data-cursor-text="Explore"
-                    >
-                      Explore Atelier
-                      <ArrowUpRight
-                        className="arrow h-4 w-4"
-                        strokeWidth={1.5}
-                      />
-                    </a>
-                  </Button>
-                </div>
-              </RevealOnScroll>
-
-              <RevealOnScroll variant="fade-up" delay={1} amount={0.4}>
-                <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-[var(--line)] pt-6">
-                  {[
-                    { icon: Truck, label: "White Glove Delivery" },
-                    { icon: Shield, label: "Lifetime Guarantee" },
-                    { icon: Hammer, label: "Hand-Crafted" },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="text-body-sm flex items-center gap-2 text-[var(--muted)]"
-                    >
-                      <item.icon
-                        className="h-4 w-4 text-[var(--gold-deep)]"
-                        strokeWidth={1}
-                      />
-                      {item.label}
-                    </div>
-                  ))}
-                </div>
-              </RevealOnScroll>
-            </div>
-
-            <div className="relative">
-              <ImageReveal
-                src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200&q=80"
-                alt="Luxury living room with curated decor"
-                direction="right"
-                duration={1.3}
-                containerClassName="aspect-editorial rounded-[0.375rem] overflow-hidden"
-                priority
-              />
-              <RevealOnScroll
-                variant="fade-up"
-                delay={0.6}
-                amount={0.5}
-                className="absolute bottom-6 left-6 z-10 max-w-[14rem] border-l border-[var(--gold)] bg-white/80 px-5 py-4 backdrop-blur-md"
-              >
-                <p className="label-caps text-[var(--gold-deep)]">Featured</p>
-                <p className="text-body-sm mt-1 font-medium text-[var(--ink)]">
-                  The Autumn Edit — {featuredProducts.length} new pieces,
-                  hand-selected.
-                </p>
-              </RevealOnScroll>
-            </div>
-          </div>
-
-          <div className="mt-20 flex justify-center">
-            <ScrollIndicator />
-          </div>
-        </Container>
-      </Section>
+      <HeroSlider />
 
       {/* ===============================================================
-       * Marquee
+       * 2. Marquee — brand values strip
        * ============================================================= */}
       <div className="grain-overlay border-y border-[var(--ink)] bg-[var(--ink)] py-8 text-[var(--cream)]">
         <Marquee speed="slow" className="gap-16">
@@ -205,112 +90,181 @@ export default async function HomePage() {
       </div>
 
       {/* ===============================================================
-       * Categories (real DB data)
+       * 3. Categories (real DB data)
        * ============================================================= */}
       <Section spacing="xl" tone="default" id="categories">
-        <div className="mb-16 flex flex-col items-center text-center">
-          <RevealOnScroll variant="fade" amount={0.6}>
-            <Eyebrow tone="gold">Shop by Category</Eyebrow>
-          </RevealOnScroll>
-          <RevealOnScroll variant="fade-up" delay={0.1} amount={0.5}>
-            <LuxuryHeading
-              variant="display-md"
-              as="h2"
-              balance
-              className="mt-4"
-            >
-              Eight collections, one philosophy
-            </LuxuryHeading>
-          </RevealOnScroll>
-          <RevealOnScroll variant="fade" delay={0.3} amount={0.5}>
-            <DecorativeDivider variant="diamond" className="mt-8" />
-          </RevealOnScroll>
-        </div>
+        <Container>
+          <div className="mb-16 flex flex-col items-center text-center">
+            <RevealOnScroll variant="fade" amount={0.6}>
+              <Eyebrow tone="gold">Shop by Category</Eyebrow>
+            </RevealOnScroll>
+            <RevealOnScroll variant="fade-up" delay={0.1} amount={0.5}>
+              <LuxuryHeading
+                variant="display-md"
+                as="h2"
+                balance
+                className="mt-4"
+              >
+                Eight collections, one philosophy
+              </LuxuryHeading>
+            </RevealOnScroll>
+            <RevealOnScroll variant="fade" delay={0.3} amount={0.5}>
+              <DecorativeDivider variant="diamond" className="mt-8" />
+            </RevealOnScroll>
+          </div>
 
-        <StaggerContainer
-          stagger={0.08}
-          amount={0.1}
-          className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
-        >
-          {categories.map((cat) => (
-            <StaggerItem key={cat.id} variant="fade-up">
-              <CategoryCard
-                name={cat.name}
-                count={cat._count.products}
-                image={
-                  cat.imageUrl ??
-                  "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
-                }
-                href={`/shop/${cat.slug}`}
-              />
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-      </Section>
-
-      {/* ===============================================================
-       * Featured Products (real DB data)
-       * ============================================================= */}
-      <Section spacing="xl" tone="surface" id="products">
-        <div className="mb-16 flex flex-col items-center text-center">
-          <RevealOnScroll variant="fade" amount={0.6}>
-            <Eyebrow tone="gold">New Arrivals</Eyebrow>
-          </RevealOnScroll>
-          <RevealOnScroll variant="fade-up" delay={0.1} amount={0.5}>
-            <LuxuryHeading
-              variant="display-md"
-              as="h2"
-              balance
-              className="mt-4"
-            >
-              The Autumn Edit
-            </LuxuryHeading>
-          </RevealOnScroll>
-          <RevealOnScroll variant="fade" delay={0.3} amount={0.5}>
-            <DecorativeDivider variant="diamond" className="mt-8" />
-          </RevealOnScroll>
-        </div>
-
-        {featuredProducts.length > 0 ? (
           <StaggerContainer
-            stagger={0.1}
+            stagger={0.08}
             amount={0.1}
-            className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 lg:grid-cols-4"
+            className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
           >
-            {featuredProducts.map((product) => (
-              <StaggerItem key={product.id} variant="fade-up">
-                <ProductCard
-                  name={product.name}
-                  price={Number(product.basePrice)}
+            {categories.map((cat) => (
+              <StaggerItem key={cat.id} variant="fade-up">
+                <CategoryCard
+                  name={cat.name}
+                  count={cat._count.products}
                   image={
-                    product.images[0] ??
+                    cat.imageUrl ??
                     "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
                   }
-                  alternateImage={product.images[1]}
-                  badge={product.isFeatured ? "New" : undefined}
-                  category={product.category?.name}
+                  href={`/shop/${cat.slug}`}
                 />
               </StaggerItem>
             ))}
           </StaggerContainer>
-        ) : (
-          <p className="text-body-lg text-center text-[var(--muted)]">
-            No featured products yet.
-          </p>
-        )}
-
-        <div className="mt-16 flex justify-center">
-          <Button variant="outline-luxury" size="lg" asChild>
-            <a href="/shop" data-cursor="text" data-cursor-text="Browse">
-              View All Products
-              <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
-            </a>
-          </Button>
-        </div>
+        </Container>
       </Section>
 
       {/* ===============================================================
-       * Stats
+       * 4. Featured Products (real DB data)
+       * ============================================================= */}
+      <Section spacing="xl" tone="surface" id="products">
+        <Container>
+          <div className="mb-16 flex flex-col items-center text-center">
+            <RevealOnScroll variant="fade" amount={0.6}>
+              <Eyebrow tone="gold">New Arrivals</Eyebrow>
+            </RevealOnScroll>
+            <RevealOnScroll variant="fade-up" delay={0.1} amount={0.5}>
+              <LuxuryHeading
+                variant="display-md"
+                as="h2"
+                balance
+                className="mt-4"
+              >
+                The Autumn Edit
+              </LuxuryHeading>
+            </RevealOnScroll>
+            <RevealOnScroll variant="fade" delay={0.3} amount={0.5}>
+              <DecorativeDivider variant="diamond" className="mt-8" />
+            </RevealOnScroll>
+          </div>
+
+          {featuredProducts.length > 0 ? (
+            <StaggerContainer
+              stagger={0.1}
+              amount={0.1}
+              className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 lg:grid-cols-4"
+            >
+              {featuredProducts.map((product) => (
+                <StaggerItem key={product.id} variant="fade-up">
+                  <ProductCard
+                    name={product.name}
+                    price={Number(product.basePrice)}
+                    image={
+                      product.images[0] ??
+                      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
+                    }
+                    alternateImage={product.images[1]}
+                    badge={product.isFeatured ? "New" : undefined}
+                    category={product.category?.name}
+                    href={`/product/${product.slug}`}
+                  />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          ) : (
+            <p className="text-body-lg text-center text-[var(--muted)]">
+              No featured products yet.
+            </p>
+          )}
+
+          <div className="mt-16 flex justify-center">
+            <Button variant="outline-luxury" size="lg" asChild>
+              <a href="/shop">
+                View All Products
+                <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
+              </a>
+            </Button>
+          </div>
+        </Container>
+      </Section>
+
+      {/* ===============================================================
+       * 5. Editorial Banner — full-bleed parallax
+       * ============================================================= */}
+      <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-[var(--ink)]">
+        <div className="absolute inset-0">
+          <ImageReveal
+            src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=1920&q=90"
+            alt="Editorial atelier interior"
+            direction="up"
+            duration={1.5}
+            containerClassName="absolute inset-0"
+          />
+          <div className="absolute inset-0 bg-[rgba(18,18,18,0.55)]" />
+          <div className="grain-overlay absolute inset-0" />
+        </div>
+
+        <Container className="relative z-10 py-24">
+          <div className="max-w-3xl">
+            <BlurReveal variant="blur-fade" amount={0.4}>
+              <div className="flex items-center gap-3">
+                <span className="h-px w-8 bg-[var(--gold)]" aria-hidden />
+                <span className="label-caps text-[var(--gold)]">
+                  The Atelier Issue 03
+                </span>
+              </div>
+            </BlurReveal>
+            <h2 className="text-display-lg mt-6 leading-[1.05] font-medium tracking-[-0.02em] text-white">
+              {["Where", "every", "object", "earns", "its", "place."].map(
+                (word, i) => (
+                  <span key={i} className="inline-block overflow-hidden">
+                    <BlurReveal
+                      variant="blur-up"
+                      delay={i * 0.06}
+                      amount={0.3}
+                      className="inline-block"
+                    >
+                      {word}&nbsp;
+                    </BlurReveal>
+                  </span>
+                ),
+              )}
+            </h2>
+            <BlurReveal variant="blur-up" delay={0.4} amount={0.3}>
+              <p className="text-body-lg mt-6 max-w-[48ch] text-white/80">
+                We work with a small collective of Pakistani artisans — third-
+                and fourth-generation craftspeople who shape each piece by hand.
+                No mass production. No compromises. Just objects made to outlive
+                trends.
+              </p>
+            </BlurReveal>
+            <BlurReveal variant="blur-up" delay={0.5} amount={0.3}>
+              <div className="mt-8">
+                <Button variant="gold" size="lg" asChild>
+                  <a href="#atelier">
+                    Read the Story
+                    <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
+                  </a>
+                </Button>
+              </div>
+            </BlurReveal>
+          </div>
+        </Container>
+      </section>
+
+      {/* ===============================================================
+       * 6. Stats — animated Counters
        * ============================================================= */}
       <Section spacing="xl" tone="default" id="stats">
         <Container>
@@ -363,9 +317,74 @@ export default async function HomePage() {
       </Section>
 
       {/* ===============================================================
-       * Atelier Story
+       * 7. Testimonials
        * ============================================================= */}
-      <Section spacing="xl" tone="surface" id="atelier" bare>
+      <Section spacing="xl" tone="surface">
+        <Container>
+          <div className="mb-16 flex flex-col items-center text-center">
+            <RevealOnScroll variant="fade" amount={0.6}>
+              <Eyebrow tone="gold">Client Voices</Eyebrow>
+            </RevealOnScroll>
+            <RevealOnScroll variant="fade-up" delay={0.1} amount={0.5}>
+              <LuxuryHeading
+                variant="display-md"
+                as="h2"
+                balance
+                className="mt-4"
+              >
+                Quietly trusted, by design
+              </LuxuryHeading>
+            </RevealOnScroll>
+            <RevealOnScroll variant="fade" delay={0.2} amount={0.5}>
+              <DecorativeDivider variant="ornament" className="mt-8" />
+            </RevealOnScroll>
+          </div>
+
+          <StaggerContainer
+            stagger={0.15}
+            amount={0.1}
+            className="grid gap-6 md:grid-cols-3"
+          >
+            {[
+              {
+                quote:
+                  "Aura Living transformed our Lahore home into a sanctuary. Every piece feels considered, intentional, and quietly luxurious.",
+                author: "Ayesha Khan",
+                role: "Interior Designer, Lahore",
+                rating: 5,
+              },
+              {
+                quote:
+                  "The craftsmanship is unmatched. Our walnut console arrived with white-glove delivery and feels like an heirloom in the making.",
+                author: "Bilal Ahmed",
+                role: "Architect, Islamabad",
+                rating: 5,
+              },
+              {
+                quote:
+                  "Finally, a Pakistani brand that understands quiet luxury. The materials, the scale, the service — everything is right.",
+                author: "Mariam Hassan",
+                role: "Homeowner, Karachi",
+                rating: 5,
+              },
+            ].map((testimonial, i) => (
+              <StaggerItem key={i} variant="fade-up">
+                <TestimonialCard
+                  quote={testimonial.quote}
+                  author={testimonial.author}
+                  role={testimonial.role}
+                  rating={testimonial.rating}
+                />
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </Container>
+      </Section>
+
+      {/* ===============================================================
+       * 8. Atelier Story
+       * ============================================================= */}
+      <Section spacing="xl" tone="default" id="atelier" bare>
         <Container>
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center lg:gap-20">
             <BlurReveal variant="blur-scale" amount={0.3}>
@@ -426,9 +445,9 @@ export default async function HomePage() {
       </Section>
 
       {/* ===============================================================
-       * FAQ
+       * 9. FAQ
        * ============================================================= */}
-      <Section spacing="xl" tone="default" id="faq">
+      <Section spacing="xl" tone="surface" id="faq">
         <Container size="narrow" className="flex flex-col gap-12">
           <div className="flex flex-col items-center text-center">
             <RevealOnScroll variant="fade" amount={0.6}>
@@ -479,9 +498,27 @@ export default async function HomePage() {
       </Section>
 
       {/* ===============================================================
-       * Trade CTA
+       * 10. Instagram
        * ============================================================= */}
-      <Section spacing="xl" tone="ink" className="grain-overlay">
+      <Section spacing="lg" tone="default">
+        <Container>
+          <InstagramGrid
+            handle="auraliving.pk"
+            images={[
+              "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80",
+              "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80",
+              "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=600&q=80",
+              "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&q=80",
+              "https://images.unsplash.com/photo-1600369671236-e74521d4b6ad?w=600&q=80",
+            ]}
+          />
+        </Container>
+      </Section>
+
+      {/* ===============================================================
+       * 11. Trade CTA
+       * ============================================================= */}
+      <Section spacing="xl" tone="ink" className="grain-overlay" id="trade">
         <Container size="narrow" className="text-center">
           <RevealOnScroll variant="fade" amount={0.5}>
             <Eyebrow tone="gold">Trade Program</Eyebrow>
@@ -505,7 +542,7 @@ export default async function HomePage() {
           <BlurReveal variant="blur-up" delay={0.3} amount={0.3}>
             <div className="mt-10 flex justify-center">
               <Button variant="gold" size="xl" asChild>
-                <a href="/sign-up" data-cursor="text" data-cursor-text="Apply">
+                <a href="/sign-up">
                   Apply for Trade Access
                   <ArrowRight className="arrow h-4 w-4" strokeWidth={1.5} />
                 </a>
