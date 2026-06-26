@@ -58,6 +58,8 @@ const eslintConfig = [
       "mini-services/**",
       "public/**",
       "scripts/**",
+      "prisma/seed.ts",
+      "prisma/migrations/**",
     ],
   },
 ];

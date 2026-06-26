@@ -172,21 +172,36 @@ src/
 - [x] All motion components respect `prefers-reduced-motion` (fall back to static or fade-only)
 - [x] Verified via Agent Browser: page loads cleanly, all sections render, animations trigger on scroll, no console errors, no page errors
 
-### 1.5 Database & ORM Initialization (Supabase + Prisma)
+### 1.5 Database & ORM Initialization (Supabase + Prisma) ✅
 
-- [ ] Receive Supabase project URL + service role key from user
-- [ ] Configure `DATABASE_URL` (Postgres pooler) + `DIRECT_URL` (for migrations)
-- [ ] Author `prisma/schema.prisma` with Postgres provider
-- [ ] Define core models (Phase 1 scope):
-  - [ ] `User` (id, email, name, role enum CUSTOMER|ADMIN, timestamps)
-  - [ ] `Category` (id, slug, name, parentId self-ref, imageUrl, sortOrder)
-  - [ ] `Product` (id, slug, name, description, basePrice, currency, status, categoryId, images[], materials[], dimensions, careInstructions, isFeatured, createdAt, updatedAt)
-  - [ ] `Order` (id, userId, status, subtotal, shipping, tax, total, currency, shippingAddress, billingAddress, createdAt)
-  - [ ] `OrderItem` (id, orderId, productId, variantId, quantity, unitPrice, totalPrice)
-- [ ] Configure Prisma Client singleton (`src/server/db/client.ts`) — prevent hot-reload exhaustion
-- [ ] Export typed `db` from `src/server/db/index.ts`
-- [ ] Run `bun run db:push` to sync schema
-- [ ] Set up Prisma Studio access command
+- [x] Receive Supabase project URL + service role key from user
+- [x] Configure `DATABASE_URL` (Postgres pooler) + `DIRECT_URL` (for migrations)
+- [x] Author `prisma/schema.prisma` with Postgres provider + `pg_trgm` + `unaccent` extensions
+- [x] Define core models (Phase 1 scope):
+  - [x] `User` (id, email, name, role enum CUSTOMER|ADMIN|TRADE, timestamps)
+  - [x] `Category` (id, slug, name, parentId self-ref, imageUrl, sortOrder)
+  - [x] `Product` (id, slug, name, description, basePrice Decimal(10,2), currency, status enum, categoryId, images[], materials[], dimensions, careInstructions, isFeatured, timestamps)
+  - [x] `Order` (id, userId, status enum, subtotal, shipping, tax, total Decimal, currency, shippingAddress JSON, billingAddress JSON, timestamps)
+  - [x] `OrderItem` (id, orderId, productId, quantity, unitPrice, totalPrice Decimal)
+- [x] Configure Prisma Client singleton at `src/server/db/client.ts` — prevents hot-reload exhaustion via globalThis cache
+- [x] Export typed `db` + `prisma` + `PrismaClient` from `src/server/db/index.ts`
+- [x] Build query helpers library at `src/server/db/queries.ts` (getUserByEmail, getFeaturedProducts, getProductBySlug, getOrdersByUser, etc.)
+- [x] Removed old `src/lib/db.ts` — all imports updated to `@/server/db`
+- [x] Run `bun run db:push` to sync schema (initial sync)
+- [x] Set up Prisma Studio access command (`bun run db:studio`)
+- [x] Set up `bun run db:seed` script + `"prisma": {"seed": ...}` config
+- [x] **NEW:** Created `prisma/seed.ts` — idempotent seed script (uses upsert):
+  - [x] 1 admin user (`admin@auraliving.pk`, role ADMIN)
+  - [x] 8 categories (matching navigation config: lighting, seating, tables, storage, textiles, decor, mirrors, outdoor — each with Unsplash cover image)
+  - [x] 16 products (2 per category, with real luxury decor data: name, description, PKR pricing, multiple images, materials, dimensions, care instructions, featured flag)
+- [x] **NEW:** Created initial migration `prisma/migrations/00000000000000_init/migration.sql` + `migration_lock.toml`
+- [x] Marked baseline migration as applied via `prisma migrate resolve`
+- [x] Verified `prisma migrate status` → "Database schema is up to date!"
+- [x] Created `prisma.config.ts` (Prisma 7+ config — replaces deprecated `package.json#prisma` block)
+- [x] Ran seed — verified: 1 user, 8 categories, 16 products, 5 featured products
+- [x] Updated smoke test (`scripts/smoke-test-db.ts`) to verify seeded data end-to-end
+- [x] Verified `bun run lint` passes (0 errors)
+- [x] Verified `bun run typecheck` passes (0 errors)
 
 ---
 

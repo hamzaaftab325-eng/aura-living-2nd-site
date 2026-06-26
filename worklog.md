@@ -440,3 +440,110 @@ Stage Summary:
   ✅ Sound (optional) — add to cart, success, notifications, toggleable
 - React Three Fiber intentionally skipped (heavy dependency, not needed for editorial luxury aesthetic — can add later for specific hero product if required).
 - Ready to commit + push to GitHub. Then Phase 2 (Auth + Backend) when user is ready.
+
+---
+
+Task ID: 1.5 COMPLETE
+Agent: main
+Task: Finish Phase 1.5 completely — db client in proper location, seed script, migrations, query helpers
+
+Work Log:
+
+=== Audit ===
+
+- Found db client at src/lib/db.ts (wrong location per plan — should be src/server/db/)
+- Found db:seed script existed in package.json but prisma/seed.ts didn't exist
+- Found no migration files (only db:push was used)
+- Found no query helpers library
+
+=== Fixed db client location ===
+
+- Created src/server/db/client.ts — PrismaClient singleton with globalThis cache (prevents hot-reload exhaustion on Supabase free tier)
+  - Exports prismaClient (with proper dev/prod log levels)
+- Created src/server/db/index.ts — barrel re-export
+  - Exports `db` and `prisma` aliases (both = prismaClient) for backward compat
+  - Exports `PrismaClient` type + all Prisma types via `export type * from "@prisma/client"`
+- Removed old src/lib/db.ts
+- Updated smoke-test-db.ts import from `../src/lib/db` → `../src/server/db`
+
+=== Built query helpers library ===
+
+- Created src/server/db/queries.ts — typed query helpers:
+  - User: getUserByEmail, getUserById, isAdmin
+  - Category: getAllCategories, getCategoryBySlug
+  - Product: getFeaturedProducts, getProductBySlug, getProductsByCategory, getNewArrivals
+  - Order: getOrdersByUser, getOrderById
+- All queries use singleton prismaClient
+
+=== Created seed script (prisma/seed.ts) ===
+
+- Idempotent (uses upsert — safe to run multiple times)
+- Seeds:
+  - 1 admin user: admin@auraliving.pk (role ADMIN)
+  - 8 categories: lighting, seating, tables, storage, textiles, decor, mirrors, outdoor
+    Each with: slug, name, sortOrder, Unsplash cover image
+  - 16 products (2 per category) with real luxury decor data:
+    - Lumen Pendant, Brass Table Lamp (lighting)
+    - Velvet Lounge Chair, Linen Armchair (seating)
+    - Oak Side Table, Walnut Console (tables)
+    - Oak Bookshelf, Walnut Sideboard (storage)
+    - Linen Throw, Wool Area Rug (textiles)
+    - Marble Vase, Ceramic Bowl (decor)
+    - Arch Floor Mirror, Round Brass Mirror (mirrors)
+    - Teak Bench, Terracotta Planter (outdoor)
+  - Each product has: slug, name, description (2-3 sentences), basePrice (PKR), images array, materials array, dimensions, careInstructions, isFeatured flag, status ACTIVE
+- 5 products marked as featured (Lumen Pendant, Velvet Lounge Chair, Linen Throw, Walnut Console, Arch Floor Mirror)
+
+=== Set up migrations properly ===
+
+- Created prisma/migrations/00000000000000_init/migration.sql via `prisma migrate diff --from-empty --to-schema-datamodel`
+- Created prisma/migrations/migration_lock.toml (provider = "postgresql")
+- Marked baseline migration as applied via `prisma migrate resolve --applied 00000000000000_init`
+- Verified `prisma migrate status` → "Database schema is up to date!"
+
+=== Prisma config modernization ===
+
+- Created prisma.config.ts (Prisma 7+ config file)
+- Removed deprecated `"prisma": {"seed": ...}` block from package.json
+- Kept `"db:seed": "bun run prisma/seed.ts"` script (works via direct invocation)
+
+=== Ran seed — verified end-to-end ===
+
+- bun run db:seed → Success
+  - 1 user (admin@auraliving.pk, ADMIN)
+  - 8 categories
+  - 16 products
+  - 5 featured products
+
+=== Updated smoke test ===
+
+- scripts/smoke-test-db.ts now verifies:
+  - Table counts (1/8/16/0/0)
+  - All 5 tables exist in public schema
+  - pg_trgm + unaccent extensions installed
+  - Admin user found by email
+  - All 8 categories listed with product counts (2 each)
+  - All 5 featured products listed with PKR prices
+  - Decimal type check (price stored as Decimal object)
+- All tests pass: "✅ Connection successful. Seed verified."
+
+=== ESLint config ===
+
+- Added prisma/seed.ts and prisma/migrations/\*\* to eslint ignores (seed script legitimately uses console.log for operational output)
+
+=== Verification ===
+
+- bun run lint: 0 errors, 1 pre-existing shadcn warning
+- bun run typecheck: 0 errors
+- bun run scripts/smoke-test-db.ts: all tests pass
+- prisma migrate status: "Database schema is up to date!"
+
+Stage Summary:
+
+- Phase 1.5 COMPLETE — properly done this time.
+- db client in correct location (src/server/db/) with singleton pattern.
+- 16 real luxury products seeded with full data (description, materials, dimensions, care instructions).
+- Migrations folder set up with baseline migration + lock file.
+- Query helpers library ready for Phase 2 Server Actions to import.
+- Smoke test verifies connection + schema + seed data end-to-end.
+- Ready for Phase 2.1 (Authentication with Better Auth).

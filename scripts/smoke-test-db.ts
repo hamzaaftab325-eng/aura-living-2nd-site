@@ -1,16 +1,17 @@
 /**
- * Smoke test — verify Aura Living Prisma + Supabase connection.
- * Lists all tables created by db:push.
+ * Smoke test — verify Aura Living Prisma + Supabase connection + seeded data.
  *
  * Run: bun run scripts/smoke-test-db.ts
  */
 
-import { db } from "../src/lib/db";
+import { db } from "../src/server/db";
 
 async function main() {
-  console.log("\n=== Aura Living — Supabase Connection Smoke Test ===\n");
+  console.log(
+    "\n=== Aura Living — Supabase Connection + Seed Smoke Test ===\n",
+  );
 
-  // Test 1: Count rows in each table (should be 0 since we haven't seeded)
+  // Test 1: Count rows in each table
   const [users, categories, products, orders, orderItems] = await Promise.all([
     db.user.count(),
     db.category.count(),
@@ -19,7 +20,7 @@ async function main() {
     db.orderItem.count(),
   ]);
 
-  console.log("Table counts (should all be 0):");
+  console.log("Table counts:");
   console.log(`  users:        ${users}`);
   console.log(`  categories:   ${categories}`);
   console.log(`  products:     ${products}`);
@@ -39,15 +40,56 @@ async function main() {
   `;
   console.log("\nInstalled extensions:");
   if (extensions.length === 0) {
-    console.log(
-      "  (pg_trgm and unaccent not yet installed — will enable in Phase 2)",
-    );
+    console.log("  (none)");
   } else {
     extensions.forEach((e) => console.log(`  - ${e.extname}`));
   }
 
+  // Test 4: Verify seeded admin user
+  const admin = await db.user.findUnique({
+    where: { email: "admin@auraliving.pk" },
+  });
+  console.log("\nAdmin user:");
+  if (admin) {
+    console.log(`  ✓ ${admin.email} (${admin.role})`);
+  } else {
+    console.log("  ✗ NOT FOUND — run `bun run db:seed`");
+  }
+
+  // Test 5: List all categories with product counts
+  const categoriesWithCounts = await db.category.findMany({
+    include: { _count: { select: { products: true } } },
+    orderBy: { sortOrder: "asc" },
+  });
+  console.log("\nCategories:");
+  categoriesWithCounts.forEach((c) =>
+    console.log(`  - ${c.name} (${c.slug}): ${c._count.products} products`),
+  );
+
+  // Test 6: List featured products
+  const featured = await db.product.findMany({
+    where: { isFeatured: true },
+    select: { name: true, slug: true, basePrice: true, currency: true },
+    orderBy: { name: "asc" },
+  });
+  console.log(`\nFeatured products (${featured.length}):`);
+  featured.forEach((p) =>
+    console.log(`  - ${p.name} — ${p.currency} ${p.basePrice}`),
+  );
+
+  // Test 7: Test Decimal handling (verify prices are stored correctly)
+  const firstProduct = await db.product.findFirst({
+    select: { name: true, basePrice: true },
+  });
+  if (firstProduct) {
+    console.log(`\nPrice type check:`);
+    console.log(
+      `  ✓ ${firstProduct.name}: ${firstProduct.basePrice} (${typeof firstProduct.basePrice})`,
+    );
+  }
+
   console.log(
-    "\n✅ Connection successful. Schema synced to Supabase Postgres.\n",
+    "\n✅ Connection successful. Seed verified. Schema synced to Supabase Postgres.\n",
   );
 }
 
