@@ -124,3 +124,77 @@ Stage Summary:
 - All luxury composite components (Container, Section, Eyebrow, LuxuryHeading) production-ready and type-safe.
 - Preview page verified end-to-end via Agent Browser — design renders correctly, zero console errors.
 - Ready for Phase 1.3 (shadcn customization) — can proceed without external keys.
+
+---
+
+Task ID: 1.3 + 1.4
+Agent: main
+Task: Phase 1.3 (Premium UI Component Library) + Phase 1.4 (Animation Engine & Smooth Scroll) — built together with Awwwards-level polish
+
+Work Log:
+
+=== Phase 1.4 — Animation Engines ===
+
+- Created src/providers/motion-provider.tsx: MotionConfig with luxuryEasing cubic-bezier(0.22,1,0.36,1), luxurySprings (soft/cart/snappy/gentle), luxuryDurations (fast/base/slow/luxury), reduced-motion guard via useReducedMotion
+- Created src/providers/lenis-provider.tsx: global Lenis smooth scroll with RAF, 1.2s duration, custom expo-out easing, reduced-motion bypass, dev-mode \_\_lenis global for debugging
+- Created src/lib/gsap.ts: client-only GSAP + ScrollTrigger registration with luxury defaults (power3.out, 0.8s)
+- Created src/providers/index.tsx: combined Providers wrapper (MotionProvider → LenisProvider)
+- Wired Providers + ScrollProgress into root app/layout.tsx
+
+Built 9 motion wrappers in src/components/motion/:
+
+- reveal-on-scroll.tsx: 9 variants (fade, up, fade-up, down, fade-down, left, right, scale, blur), delay/amount/once/as polymorphic
+- split-heading.tsx: line-by-line reveal with overflow-hidden mask + 110%→0 translate, staggered children, immediate or whileInView
+- magnetic-button.tsx: magnetic hover with strength/radius config, springs back via luxurySprings.gentle
+- parallax-image.tsx: scroll-driven ±12% translate + scale 1.2, wraps next/image
+- stagger.tsx: StaggerContainer + StaggerItem with 5 variants (fade/fade-up/fade-down/scale/blur)
+- scroll-progress.tsx: thin gold progress bar fixed at top, spring-tracked scrollYProgress, fades in after 0.5%
+- marquee.tsx: infinite horizontal scroll, 3 speeds, direction control, pause-on-hover, separator prop
+- counter.tsx: animated count-up on scroll-into-view, prefix/suffix/decimals, locale formatting
+- tilt.tsx: 3D tilt on hover (max 6°), spring-back, optional glare gradient
+- All components respect prefers-reduced-motion (fall back to static or fade-only)
+- index.ts barrel export
+
+=== Phase 1.3 — Luxury Components ===
+Customized shadcn primitives (src/components/ui/):
+
+- button.tsx: added luxury variants — primary (deep black, uppercase tracked, hover lift + shadow), gold (CTA, hover glow), outline-luxury (bordered, hover invert), underline (gold underline reveal via ::after scaleX). Sizes: default/sm/lg/xl/icon/icon-sm/icon-lg
+- dialog.tsx: cream-tinted overlay (rgba(253,251,247,0.6) + 4px blur), reduced radius 0.375rem, soft luxury shadow (0 30px 80px rgba(18,18,18,0.12))
+- sheet.tsx: cream overlay, max-width bumped to sm:max-w-md for cart drawer, luxury shadow, border-[var(--line)]
+
+Built 5 luxury composite components:
+
+- underline-input.tsx: underline input with floating Label-Caps label, gold animated focus underline (motion scaleX), error/hint transitions via AnimatePresence
+- material-chip.tsx: pill chip with default/gold/outline variants, selected state, dismissible, motion whileTap scale 0.96
+- product-card.tsx: image 85% (aspect-product 4:5), hover image zoom 1.04 with 700ms luxury ease, soft-ambient shadow, quick-add button slides up on hover (motion variants), wishlist heart toggle (gold fill), 4 luxury badge variants (New/Bestseller/Limited/Sale), Playfair Display name + Inter price, PKR formatting
+- glassmorphic-header.tsx: sticky header with backdrop-blur-xl + bg-white/80 + backdrop-saturate-150, 5% black hairline border, height shrinks 80→56px on scroll via Motion useScroll + useMotionValueEvent
+- luxury-badge.tsx: 5 variants (new/bestseller/limited/sale/subtle), 2 sizes (sm/md), optional animate-in via motion
+- ui/index.ts barrel export for all luxury composites
+
+=== Preview Page ===
+Replaced Phase 1.2 preview with Awwwards-level showcase (src/app/page.tsx):
+
+- GlassmorphicHeader with nav + cart badge
+- Hero with SplitHeading line-by-line reveal, MagneticButton CTAs, ParallaxImage
+- Marquee brand values strip on ink background
+- Product grid with StaggerContainer + StaggerItem + Tilt + ProductCard (8 mock products with PKR pricing)
+- Stats section with Counter (1247 pieces, 98% clients, 32 artisans, ₨25,000 threshold)
+- Atelier story with SplitHeading (whileInView) + ParallaxImage + MaterialChip variants
+- Service highlights with Tilt cards (White Glove / Lifetime Guarantee / Trade Program)
+- Newsletter section with UnderlineInput + MagneticButton on ink background
+- Footer with brand + LuxuryBadge
+
+=== Verification ===
+
+- bun run lint: 0 errors, 1 pre-existing shadcn warning
+- bun run typecheck: 0 errors (after fixing counter setState-in-effect, Tilt conditional hook, RevealOnScroll variant aliases)
+- Agent Browser: page loads cleanly, all sections render, animations trigger on scroll, no console errors, no page errors
+- Screenshots saved: phase-1.3-1.4-luxury-ui.png (363KB) + phase-1.3-1.4-luxury-ui-scrolled.png (1.1MB)
+
+Stage Summary:
+
+- Phase 1.3 + 1.4 COMPLETE. Foundation phase is now FULLY done (1.1 + 1.2 + 1.3 + 1.4 + 1.5).
+- Production-grade animation toolkit (Motion + Lenis + GSAP) with 9 reusable wrappers, all reduced-motion compliant.
+- 5 luxury composite components + customized shadcn primitives ready for Phase 3 catalog UI.
+- Awwwards-level preview page demonstrates: line-by-line hero reveal, magnetic CTAs, parallax imagery, staggered product grid, 3D tilt cards, animated counters, marquee, smooth scroll, gold progress bar.
+- Ready for Phase 2.1: Authentication System (Better Auth, email/password, JWT sessions, admin role gate).

@@ -3,6 +3,8 @@ import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/config/site";
+import { Providers } from "@/providers";
+import { ScrollProgress } from "@/components/motion";
 
 // ---------------------------------------------------------------------------
 // Typography — Aura Living brand spec
@@ -41,7 +43,6 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-  manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
   },
@@ -90,8 +91,11 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${inter.variable} bg-background text-foreground font-sans antialiased`}
       >
-        {children}
-        <Toaster />
+        <Providers>
+          <ScrollProgress />
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

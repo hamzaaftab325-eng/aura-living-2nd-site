@@ -130,40 +130,47 @@ src/
 - [x] Verified visually via Agent Browser: all headings, buttons, inputs, chips render correctly
 - [x] Screenshot saved to `/home/z/my-project/download/phase-previews/phase-1.2-design-system.png`
 
-### 1.3 Premium UI Component Library Integration
+### 1.3 Premium UI Component Library Integration ✅
 
-- [ ] Initialize `shadcn/ui` with New York style + Tailwind v4
-- [ ] Install Lucide React icon set
-- [ ] Install & customize shadcn primitives (radii reduced to 0.25rem, borders removed where design dictates):
-  - [ ] Button (variants: `primary-black`, `gold-cta`, `ghost-underline`, `icon-luxury`)
-  - [ ] Input (underline variant per DESIGN.md)
-  - [ ] Label (label-caps variant)
-  - [ ] Card (flush, no border, soft-ambient shadow on hover)
-  - [ ] Dialog (cream-tinted overlay)
-  - [ ] Sheet (slide-out cart, slide-in filters)
-  - [ ] Accordion (for PDP details)
-  - [ ] Tabs, Tooltip, Toast, Dropdown, Select, Checkbox, RadioGroup, Separator
-- [ ] Build luxury composite components:
-  - [ ] `<LuxuryHeading>` — Playfair Display with kerning control
-  - [ ] `<Eyebrow>` — label-caps tracked text
-  - [ ] `<Container>` — 1440px max with responsive margins
-  - [ ] `<Section>` — vertical stack wrapper (stack-md/xl options)
+- [x] shadcn/ui already initialized with New York style + Tailwind v4
+- [x] Lucide React icon set installed
+- [x] Customize shadcn primitives to luxury spec:
+  - [x] Button — luxury variants added: `primary` (deep black, uppercase tracked, hover lift), `gold` (CTA, hover glow), `outline-luxury` (bordered, hover invert), `underline` (gold underline reveal). Sizes: default/sm/lg/xl/icon/icon-sm/icon-lg.
+  - [x] Dialog — cream-tinted overlay (`rgba(253,251,247,0.6)` + 4px blur), reduced radius, soft luxury shadow
+  - [x] Sheet — cream overlay, max-width bumped to `md` for cart drawer, luxury shadow
+- [x] Build luxury composite components:
+  - [x] `<UnderlineInput>` — underline input with floating Label-Caps label, gold animated focus underline, error/hint transitions
+  - [x] `<MaterialChip>` — pill chip with default/gold/outline variants, selected state, dismissible, motion whileTap
+  - [x] `<ProductCard>` — image 85% (aspect-product), hover image zoom 1.04, soft-ambient shadow, quick-add button slides up, wishlist heart toggle (gold fill), luxury badge variants (New/Bestseller/Limited/Sale), Playfair name + Inter price
+  - [x] `<GlassmorphicHeader>` — sticky header with backdrop-blur-xl + 80% white + 5% black hairline border, height shrinks 80→56px on scroll via Motion
+  - [x] `<LuxuryBadge>` — 5 variants (new/bestseller/limited/sale/subtle), 2 sizes, optional animate-in
+- [x] Created `src/components/ui/index.ts` barrel export for luxury composites
 
-### 1.4 Animation Engine & Smooth Scroll Setup
+### 1.4 Animation Engine & Smooth Scroll Setup ✅
 
-- [ ] Install `motion` (Framer Motion successor), `gsap`, `lenis`, `split-type`, `lottie-react`
-- [ ] Create `src/providers/MotionProvider.tsx` — global MotionConfig with luxury spring presets:
-  - [ ] `easeLuxury = [0.22, 1, 0.36, 1]` (cubic-bezier)
-  - [ ] `springSoft = { type: 'spring', stiffness: 280, damping: 32, mass: 0.8 }`
-  - [ ] `springCart = { type: 'spring', stiffness: 320, damping: 30 }`
-- [ ] Create `src/providers/LenisProvider.tsx` — global Lenis instance with RAF integration
-- [ ] Create `src/lib/gsap.ts` — registered `gsap` + `ScrollTrigger` (client-only, tree-shaken)
-- [ ] Build reusable motion wrappers:
-  - [ ] `<RevealText>` — staggered word/line reveals via SplitType
-  - [ ] `<RevealOnScroll>` — IntersectionObserver-driven fade/translate
-  - [ ] `<MagneticButton>` — subtle magnetic hover for CTAs
-  - [ ] `<ParallaxImage>` — scroll-driven parallax for hero imagery
-- [ ] Ensure all motion respects `prefers-reduced-motion`
+- [x] `motion`, `gsap`, `lenis`, `split-type`, `lottie-react` already installed in Phase 1.1
+- [x] Create `src/providers/motion-provider.tsx` — global MotionConfig with luxury spring presets:
+  - [x] `luxuryEasing = [0.22, 1, 0.36, 1]` (cubic-bezier)
+  - [x] `luxuryEasingIn = [0.7, 0, 0.84, 0]` / `luxuryEasingOut = [0.16, 1, 0.3, 1]`
+  - [x] Springs: `soft` (stiffness 280, damping 32), `cart` (320/30), `snappy` (500/38), `gentle` (180/26)
+  - [x] Durations: fast 0.18s, base 0.32s, slow 0.54s, luxury 0.8s
+  - [x] Reduced-motion guard via `useReducedMotion()` → `reducedMotion="always"`
+- [x] Create `src/providers/lenis-provider.tsx` — global Lenis instance with RAF integration, 1.2s duration, custom easing, reduced-motion bypass
+- [x] Create `src/lib/gsap.ts` — registered `gsap` + `ScrollTrigger` (client-only, tree-shaken), luxury defaults
+- [x] Create `src/providers/index.tsx` — combined Providers (MotionProvider + LenisProvider)
+- [x] Wire Providers + ScrollProgress into root `app/layout.tsx`
+- [x] Build reusable motion wrappers in `src/components/motion/`:
+  - [x] `<RevealOnScroll>` — 9 variants (fade, up, fade-up, down, fade-down, left, right, scale, blur), delay + amount + once + as polymorphic
+  - [x] `<SplitHeading>` — line-by-line reveal with overflow-hidden mask + staggered translate (110% → 0), immediate or whileInView trigger
+  - [x] `<MagneticButton>` — magnetic hover with strength/radius config, springs back via luxury gentle spring
+  - [x] `<ParallaxImage>` — scroll-driven parallax (±12% translate, scale 1.15-1.2), wraps next/image
+  - [x] `<StaggerContainer>` + `<StaggerItem>` — orchestrate staggered children with 5 variants
+  - [x] `<ScrollProgress>` — thin gold progress bar fixed at top, spring-tracked, fades in after 0.5% scroll
+  - [x] `<Marquee>` — infinite horizontal scroll, slow/medium/fast speeds, direction control, pause-on-hover
+  - [x] `<Counter>` — animated number count-up on scroll-into-view, prefix/suffix/decimals support, locale formatting
+  - [x] `<Tilt>` — subtle 3D tilt on hover (max 6°), spring-back, optional glare gradient
+- [x] All motion components respect `prefers-reduced-motion` (fall back to static or fade-only)
+- [x] Verified via Agent Browser: page loads cleanly, all sections render, animations trigger on scroll, no console errors, no page errors
 
 ### 1.5 Database & ORM Initialization (Supabase + Prisma)
 
@@ -492,31 +499,34 @@ src/
 
 ## Phase Status Tracker
 
-| Phase               | Status | Started    | Completed | Notes                                                       |
-| ------------------- | ------ | ---------- | --------- | ----------------------------------------------------------- |
-| 0 — Master Config   | `[~]`  | 2026-06-26 | —         | Folder arch + brand config done; TS/ESLint/Husky configured |
-| 1 — Foundation      | `[~]`  | 2026-06-26 | —         | 1.1 ✅ 1.2 ✅ 1.5 ✅. Next: 1.3 shadcn customization        |
-| 2 — Auth & Backend  | `[ ]`  | —          | —         |                                                             |
-| 3 — Catalog UI      | `[ ]`  | —          | —         |                                                             |
-| 4 — Checkout        | `[ ]`  | —          | —         |                                                             |
-| 5 — Polish & Launch | `[ ]`  | —          | —         |                                                             |
+| Phase               | Status | Started    | Completed  | Notes                                                       |
+| ------------------- | ------ | ---------- | ---------- | ----------------------------------------------------------- |
+| 0 — Master Config   | `[~]`  | 2026-06-26 | —          | Folder arch + brand config done; TS/ESLint/Husky configured |
+| 1 — Foundation      | `[x]`  | 2026-06-26 | 2026-06-26 | 1.1 ✅ 1.2 ✅ 1.3 ✅ 1.4 ✅ 1.5 ✅ — Foundation COMPLETE    |
+| 2 — Auth & Backend  | `[ ]`  | —          | —          |                                                             |
+| 3 — Catalog UI      | `[ ]`  | —          | —          |                                                             |
+| 4 — Checkout        | `[ ]`  | —          | —          |                                                             |
+| 5 — Polish & Launch | `[ ]`  | —          | —          |                                                             |
 
 ---
 
 ## Change Log
 
-| Date       | Change                                                                                                                                                                                                                                                                      | Phase |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| 2026-06-26 | Initial execution plan authored                                                                                                                                                                                                                                             | —     |
-| 2026-06-26 | Revised to in-house/free-tier approach (no paid 3rd-party deps)                                                                                                                                                                                                             | —     |
-| 2026-06-26 | Skipped Google OAuth (free tier constraint)                                                                                                                                                                                                                                 | 2.1   |
-| 2026-06-26 | Phase 1.1 complete: project init, strict TS/ESLint, Husky, config files, folder arch                                                                                                                                                                                        | 1.1   |
-| 2026-06-26 | Rebrand: Ethereal Dwelling → Aura Living (Pakistani audience, PKR currency)                                                                                                                                                                                                 | 0.1   |
-| 2026-06-26 | Supabase credentials received + DB connection verified; Phase 1.5 core models synced (5 tables, pg_trgm + unaccent)                                                                                                                                                         | 1.5   |
-| 2026-06-26 | Added `instrumentation.ts` + `env -u` in dev script to override stale system env vars                                                                                                                                                                                       | 1.1   |
-| 2026-06-26 | Updated Supabase keys to standard JWT format (anon + service_role)                                                                                                                                                                                                          | 1.5   |
-| 2026-06-26 | Phase 1.2 complete: full luxury design system in globals.css (Playfair Display + Inter, brand palette, clamp() fluid type, motion tokens, glassmorphic + soft-ambient shadows), Container/Section/Eyebrow/LuxuryHeading composites, preview page verified via Agent Browser | 1.2   |
+| Date       | Change                                                                                                                                                                                                                                                                                                                                                 | Phase |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| 2026-06-26 | Initial execution plan authored                                                                                                                                                                                                                                                                                                                        | —     |
+| 2026-06-26 | Revised to in-house/free-tier approach (no paid 3rd-party deps)                                                                                                                                                                                                                                                                                        | —     |
+| 2026-06-26 | Skipped Google OAuth (free tier constraint)                                                                                                                                                                                                                                                                                                            | 2.1   |
+| 2026-06-26 | Phase 1.1 complete: project init, strict TS/ESLint, Husky, config files, folder arch                                                                                                                                                                                                                                                                   | 1.1   |
+| 2026-06-26 | Rebrand: Ethereal Dwelling → Aura Living (Pakistani audience, PKR currency)                                                                                                                                                                                                                                                                            | 0.1   |
+| 2026-06-26 | Supabase credentials received + DB connection verified; Phase 1.5 core models synced (5 tables, pg_trgm + unaccent)                                                                                                                                                                                                                                    | 1.5   |
+| 2026-06-26 | Added `instrumentation.ts` + `env -u` in dev script to override stale system env vars                                                                                                                                                                                                                                                                  | 1.1   |
+| 2026-06-26 | Updated Supabase keys to standard JWT format (anon + service_role)                                                                                                                                                                                                                                                                                     | 1.5   |
+| 2026-06-26 | Phase 1.2 complete: full luxury design system in globals.css (Playfair Display + Inter, brand palette, clamp() fluid type, motion tokens, glassmorphic + soft-ambient shadows), Container/Section/Eyebrow/LuxuryHeading composites, preview page verified via Agent Browser                                                                            | 1.2   |
+| 2026-06-26 | Phase 1.3 complete: customized shadcn Button (luxury variants primary/gold/outline-luxury/underline), Dialog (cream overlay), Sheet (cart drawer pattern). Built luxury composites: UnderlineInput, MaterialChip, ProductCard, GlassmorphicHeader, LuxuryBadge                                                                                         | 1.3   |
+| 2026-06-26 | Phase 1.4 complete: MotionProvider (luxury springs + reduced-motion guard), LenisProvider (inertia smooth scroll), GSAP+ScrollTrigger registered, 9 motion wrappers (RevealOnScroll, SplitHeading, MagneticButton, ParallaxImage, Stagger, ScrollProgress, Marquee, Counter, Tilt). Awwwards-level preview page showcasing all components + animations | 1.4   |
+| 2026-06-26 | **Phase 1 FOUNDATION COMPLETE** — ready for Phase 2 (Auth + Backend)                                                                                                                                                                                                                                                                                   | 1     |
 
 ---
 
-**Next action awaiting:** User command to begin **Phase 1.3: Premium UI Component Library Integration** (shadcn/ui customization to luxury spec).
+**Next action awaiting:** User command to begin **Phase 2.1: Authentication System (Better Auth)**.
