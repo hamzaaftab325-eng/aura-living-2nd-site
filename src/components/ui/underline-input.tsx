@@ -106,11 +106,10 @@ export const UnderlineInput = forwardRef<HTMLInputElement, UnderlineInputProps>(
 
         {/* Animated underline accent on focus */}
         <motion.div
-          className="pointer-events-none absolute bottom-0 left-0 h-px origin-left bg-[var(--gold)]"
+          className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left bg-[var(--gold)]"
           initial={false}
           animate={{ scaleX: focused ? 1 : 0 }}
           transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-          style={{ width: "100%" }}
         />
 
         {/* Hint or error */}

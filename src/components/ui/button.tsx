@@ -5,24 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 /**
- * Aura Living Button — luxury variants.
+ * Aura Living Button — luxury variants with premium hover effects.
  *
- * Variants:
- *   - default       — shadcn default (kept for backward compat)
- *   - primary       — Deep Black (#121212), uppercase tracked, hover lift
- *   - gold          — Luxury Gold CTA (use ONLY for Add-to-Cart / Buy-Now)
- *   - ghost         — transparent, hover bg-cream
- *   - outline       — bordered, hover border-ink
- *   - underline     — text + gold underline reveal on hover
- *   - link          — text link (shadcn compat)
- *   - destructive   — red (kept for destructive actions)
+ * Premium hover behaviors (no magnetic effect — pure CSS-driven):
+ *   - primary       — Deep Black bg, white text. Hover: bg lightens, arrow
+ *                     slides right, subtle lift, soft shadow bloom.
+ *   - gold          — Gold CTA. Hover: bg softens, gold glow shadow, lift.
+ *   - outline-luxury— Bordered. Hover: ink fill sweeps up from bottom, text inverts.
+ *   - underline     — Text + gold underline that grows from left on hover.
+ *   - link-arrow    — Text + arrow icon. Hover: text → gold, arrow slides right.
+ *   - ghost         — Transparent. Hover: cream bg, subtle text shift.
  *
  * Sizes:
  *   - default, sm, lg, xl, icon, icon-sm, icon-lg
  */
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/btn relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-500 [&_svg]:ease-[cubic-bezier(0.22,1,0.36,1)] [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -38,14 +37,16 @@ const buttonVariants = cva(
         ghost: "rounded-md hover:bg-[var(--cream)] hover:text-[var(--ink)]",
         link: "text-[var(--ink)] underline-offset-4 hover:underline",
 
-        // Aura Living luxury variants
+        // Aura Living luxury variants — premium hover, no magnetic
         primary:
-          "rounded-[0.25rem] bg-[var(--ink)] px-8 py-3.5 text-[0.75rem] font-semibold tracking-[0.1em] text-white uppercase hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(18,18,18,0.15)] active:translate-y-0",
-        gold: "rounded-[0.25rem] bg-[var(--gold)] px-8 py-3.5 text-[0.75rem] font-semibold tracking-[0.1em] text-[var(--ink)] uppercase hover:-translate-y-0.5 hover:bg-[var(--gold-soft)] hover:shadow-[0_8px_24px_rgba(212,175,55,0.28)] active:translate-y-0 active:bg-[var(--gold-deep)]",
+          "rounded-[0.25rem] bg-[var(--ink)] px-8 py-3.5 text-[0.75rem] font-semibold tracking-[0.1em] text-white uppercase hover:-translate-y-0.5 hover:bg-[#1f1f1f] hover:shadow-[0_14px_36px_rgba(18,18,18,0.18)] active:translate-y-0 [&_svg.arrow]:group-hover/btn:translate-x-1",
+        gold: "rounded-[0.25rem] bg-[var(--gold)] px-8 py-3.5 text-[0.75rem] font-semibold tracking-[0.1em] text-[var(--ink)] uppercase hover:-translate-y-0.5 hover:bg-[var(--gold-soft)] hover:shadow-[0_12px_32px_rgba(212,175,55,0.32)] active:translate-y-0 active:bg-[var(--gold-deep)] [&_svg.arrow]:group-hover/btn:translate-x-1",
         "outline-luxury":
-          "rounded-[0.25rem] border border-[var(--ink)] bg-transparent px-8 py-3.5 text-[0.75rem] font-semibold tracking-[0.1em] text-[var(--ink)] uppercase hover:-translate-y-0.5 hover:bg-[var(--ink)] hover:text-white active:translate-y-0",
+          "rounded-[0.25rem] border border-[var(--ink)] bg-transparent px-8 py-3.5 text-[0.75rem] font-semibold tracking-[0.1em] text-[var(--ink)] uppercase hover:border-[var(--ink)] hover:text-white active:translate-y-0 [&>span]:absolute [&>span]:inset-0 [&>span]:-z-10 [&>span]:origin-bottom [&>span]:scale-y-0 [&>span]:bg-[var(--ink)] [&>span]:transition-transform [&>span]:duration-500 [&>span]:ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/btn:[&>span]:scale-y-100",
         underline:
-          "relative px-0 pb-1 text-[0.875rem] font-medium text-[var(--ink)] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-right after:scale-x-0 after:bg-[var(--gold)] after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.22,1,0.36,1)] hover:after:origin-left hover:after:scale-x-100",
+          "relative px-0 pb-1 text-[0.875rem] font-medium text-[var(--ink)] transition-colors duration-300 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-right after:scale-x-0 after:bg-[var(--gold)] after:transition-transform after:duration-500 after:ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-[var(--gold-deep)] hover:after:origin-left hover:after:scale-x-100",
+        "link-arrow":
+          "relative px-0 text-[0.875rem] font-medium text-[var(--ink)] transition-colors duration-300 hover:text-[var(--gold-deep)] [&_svg.arrow]:group-hover/btn:translate-x-1.5",
       },
       size: {
         default: "h-10 px-5 py-2 text-sm has-[>svg]:px-3",
@@ -69,6 +70,7 @@ function Button({
   variant,
   size,
   asChild = false,
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
@@ -76,12 +78,30 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button";
 
+  // outline-luxury uses a span overlay for the ink sweep-up effect.
+  // The overlay is only rendered when NOT using asChild (Slot requires
+  // a single child, and the overlay span would be a second child).
+  if (variant === "outline-luxury" && !asChild) {
+    return (
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
+        <span aria-hidden className="pointer-events-none" />
+        {children}
+      </Comp>
+    );
+  }
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {children}
+    </Comp>
   );
 }
 

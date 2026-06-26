@@ -198,3 +198,100 @@ Stage Summary:
 - 5 luxury composite components + customized shadcn primitives ready for Phase 3 catalog UI.
 - Awwwards-level preview page demonstrates: line-by-line hero reveal, magnetic CTAs, parallax imagery, staggered product grid, 3D tilt cards, animated counters, marquee, smooth scroll, gold progress bar.
 - Ready for Phase 2.1: Authentication System (Better Auth, email/password, JWT sessions, admin role gate).
+
+---
+
+Task ID: 1.3 + 1.4 REFINED
+Agent: main
+Task: User-requested refinement pass — remove magnetic buttons, add premium hover effects, add text/blur animations across all sections, improve design from 3/10 to 10/10, remove inline styles, add more items/icons/interactions
+
+Work Log:
+
+=== Cleanup ===
+
+- Audited existing code for inline styles via grep
+- Removed inline style={{ width: "100%" }} from underline-input.tsx (replaced with w-full class)
+- Confirmed progress.tsx + chart.tsx inline styles are stock shadcn, left untouched
+- Motion animation style props are necessary (useTransform requires style) — kept as-is
+
+=== Removed MagneticButton ===
+
+- Removed all MagneticButton usage from page.tsx
+- Replaced with premium CSS-driven hover effects on Button component
+
+=== Enhanced Button Component ===
+
+- Added group/btn class for group-hover support
+- New variant: link-arrow (text + arrow icon, gold color shift + arrow translate on hover)
+- Refined primary variant: arrow slides right via [&_svg.arrow]:group-hover/btn:translate-x-1
+- Refined gold variant: arrow slides right + glow shadow + lift
+- Refined outline-luxury: ink sweep-up overlay via [&>span] absolute + scaleY transform
+- Refined underline variant: text color shifts to gold on hover
+- Fixed Slot single-child issue: outline-luxury overlay only rendered when !asChild
+
+=== New Motion Components (4 added) ===
+
+- blur-reveal.tsx: 4 variants (blur-in, blur-up, blur-scale, blur-fade) for cinematic section reveals
+- word-reveal.tsx: word-by-word staggered reveal with overflow-hidden masks, immediate or whileInView
+- image-reveal.tsx: clip-path mask reveal (4 directions) + scale 1.15→1 + blur 12px→0, wraps next/image
+- draw-line.tsx: self-drawing horizontal/vertical line via scaleX animation, transform-origin based on direction
+- Updated motion/index.ts barrel export to include all 13 motion components
+
+=== New Luxury Components (6 added) ===
+
+- category-card.tsx: 3/4 aspect luxury category tile with image zoom 1.06, arrow icon slide-in, gold accent line draws to 12px width on hover, dark gradient overlay for legibility
+- testimonial-card.tsx: editorial testimonial with Quote icon, 5-star rating, Playfair italic body, hover lift + gold border glow + shadow bloom
+- journal-card.tsx: editorial article preview with image zoom 1.05, arrow reveal on hover, meta strip (category • date • reading time), line-clamp-3 excerpt, title shifts to gold on hover
+- faq-accordion.tsx: luxury FAQ using Radix Accordion with custom plus/minus indicator (rotates to gold on open)
+- newsletter-signup.tsx: split-layout newsletter capture with WordReveal headline, animated checklist, success state with gold check icon, cream-tinted form container
+- instagram-grid.tsx: editorial 5-cell grid with first cell taking 2x2 space, hover overlay with heart icon + View Post label
+
+=== Updated UI Barrel ===
+
+- ui/index.ts: added CategoryCard, TestimonialCard, JournalCard, FAQAccordion, NewsletterSignup, InstagramGrid
+- Exported all Props interfaces
+
+=== Luxury CSS Utilities Added (globals.css) ===
+
+- line-clamp-2, line-clamp-3 (editorial excerpts)
+- ornament-dots (decorative three-dot divider with flanking lines)
+- grain-overlay (subtle SVG noise texture for hero/ink sections, 4% opacity, overlay blend)
+- ken-burns (22s slow zoom for hero imagery)
+- accordion-down / accordion-up keyframes (0.5s luxury easing)
+- text-vertical (writing-mode for editorial side labels)
+
+=== Rewrote page.tsx — 14 sections ===
+
+1. GlassmorphicHeader with brand wordmark + EST. 2026 + 4 nav links + 3 action icons + cart badge
+2. Hero: SplitHeading 3-line reveal + ImageReveal (right-to-left mask + scale + blur) + floating editorial label + scroll cue + trust strip (White Glove / Lifetime Guarantee / Hand-Crafted)
+3. Marquee on ink: 7 brand values with gold Sparkles separators, italic Playfair
+4. Categories: 8 CategoryCards in 4-col grid with stagger reveal
+5. Editorial Banner: full-bleed parallax with grain overlay, BlurReveal + WordReveal headline + gold CTA
+6. Product Grid: 8 ProductCards with StaggerContainer + Tilt (max 3°, scale 1.01)
+7. Stats: 4 animated Counters with BlurReveal + DrawLine accent
+8. Testimonials: 3 TestimonialCards in 3-col grid with stagger
+9. Atelier Story: SplitHeading + ParallaxImage + MaterialChip demo + service highlights (Leaf/Ruler/Hammer icons)
+10. Journal: 3 JournalCards in 3-col grid with stagger + View All link-arrow
+11. Newsletter: split-layout NewsletterSignup on ink with grain overlay
+12. FAQ: 6-item FAQAccordion with concierge CTA below
+13. Instagram: 5-image editorial grid with handle header
+14. Footer: 4-column (brand + Shop + Atelier + Client Care) + social icons + legal links
+
+=== Verification ===
+
+- bun run lint: 0 errors, 1 pre-existing shadcn warning (use-toast.ts)
+- bun run typecheck: 0 errors
+- Removed unused imports: motion from journal-card, UnderlineInput from newsletter-signup, removed inline import statement from page.tsx
+- Agent Browser reload: 200 OK, no errors
+- Captured 8 screenshots across scroll positions: top, categories, banner, products, stats, testimonials, journal, faq, footer (all in /home/z/my-project/download/phase-previews/phase-1.3-1.4-refined-\*.png)
+- Snapshot confirmed all 14 sections render correctly with proper heading hierarchy
+
+Stage Summary:
+
+- Refinement pass COMPLETE. Removed magnetic buttons (per user request), replaced with premium CSS hover effects on Button (arrow translate, ink sweep-up overlay, gold color shifts).
+- Added 4 new motion components (BlurReveal, WordReveal, ImageReveal, DrawLine) for cinematic blur + text animations across all sections.
+- Added 6 new luxury components (CategoryCard, TestimonialCard, JournalCard, FAQAccordion, NewsletterSignup, InstagramGrid).
+- Rewrote page.tsx from 8 sections → 14 sections, all with refined animations and editorial composition.
+- Removed all non-animation inline styles. Added luxury utility CSS (line-clamp, ornament-dots, grain-overlay, ken-burns, accordion keyframes, text-vertical).
+- Design elevated from 3/10 to production-grade luxury polish — verified end-to-end via Agent Browser with 8 screenshots.
+- Ready to commit + push to GitHub, then proceed to Phase 2 (Auth + Backend) when user is ready.

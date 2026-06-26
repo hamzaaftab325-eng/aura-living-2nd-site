@@ -18,6 +18,12 @@ export { MaterialChip } from "./material-chip";
 export { ProductCard } from "./product-card";
 export { GlassmorphicHeader } from "./glassmorphic-header";
 export { LuxuryBadge } from "./luxury-badge";
+export { CategoryCard } from "./category-card";
+export { TestimonialCard } from "./testimonial-card";
+export { JournalCard } from "./journal-card";
+export { FAQAccordion } from "./faq-accordion";
+export { NewsletterSignup } from "./newsletter-signup";
+export { InstagramGrid } from "./instagram-grid";
 
 // --- Types ---
 export type { UnderlineInputProps } from "./underline-input";
@@ -25,3 +31,8 @@ export type { MaterialChipProps } from "./material-chip";
 export type { ProductCardProps } from "./product-card";
 export type { GlassmorphicHeaderProps } from "./glassmorphic-header";
 export type { LuxuryBadgeProps } from "./luxury-badge";
+export type { CategoryCardProps } from "./category-card";
+export type { TestimonialCardProps } from "./testimonial-card";
+export type { JournalCardProps } from "./journal-card";
+export type { FAQAccordionProps } from "./faq-accordion";
+export type { InstagramGridProps } from "./instagram-grid";
