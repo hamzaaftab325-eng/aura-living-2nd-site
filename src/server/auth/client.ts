@@ -13,11 +13,15 @@
  *   await authClient.signOut();
  *   const { data: session } = authClient.useSession();
  *
- * baseURL behavior:
- *   - If NEXT_PUBLIC_APP_URL is set → use it (explicit, works in any environment)
- *   - If not set → omit baseURL (Better Auth uses relative URLs, browser
- *     automatically uses current origin). This is the correct production
- *     pattern — no hardcoded URLs, works on any deploy domain.
+ * baseURL strategy (bulletproof — works on ANY deploy domain):
+ *   - In the browser: ALWAYS use window.location.origin
+ *     (automatically adapts to localhost:3000 in dev, your-project.vercel.app
+ *     in preview, auraliving.pk in production — no env vars needed)
+ *   - During SSR: fall back to NEXT_PUBLIC_APP_URL or undefined (relative URLs)
+ *
+ * This fixes the issue where uploading a local .env (with
+ * NEXT_PUBLIC_APP_URL=http://localhost:3000) to Vercel caused the auth client
+ * to POST to localhost:3000 even in production.
  *
  * Note: forgetPassword / resetPassword / verifyEmail methods will be
  * enabled when we add the corresponding Better Auth plugins in Phase 5.
@@ -25,12 +29,20 @@
 
 import { createAuthClient } from "better-auth/react";
 
-// Only set baseURL if explicitly provided. Otherwise let Better Auth
-// use relative URLs (window.location.origin) — works on any domain
-// without needing to update env vars when deploying to different URLs.
-const baseURL = process.env.NEXT_PUBLIC_APP_URL || undefined;
+function getBaseURL(): string | undefined {
+  // In the browser — always use the current origin.
+  // This is bulletproof: works on localhost, vercel.app, custom domain.
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
 
-export const authClient = createAuthClient(baseURL ? { baseURL } : undefined);
+  // During SSR — use env var if set, otherwise let Better Auth use relative URLs.
+  return process.env.NEXT_PUBLIC_APP_URL || undefined;
+}
+
+export const authClient = createAuthClient({
+  baseURL: getBaseURL(),
+});
 
 // Convenience exports (only methods that exist on the default client)
 export const { signIn, signUp, signOut, useSession } = authClient;

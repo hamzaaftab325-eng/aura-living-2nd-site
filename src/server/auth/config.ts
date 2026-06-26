@@ -19,7 +19,6 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin } from "better-auth/plugins";
 import { headers } from "next/headers";
 import { prismaClient } from "@/server/db/client";
-import { siteConfig } from "@/config/site";
 
 export const auth = betterAuth({
   // Prisma adapter — uses our singleton client
@@ -96,11 +95,11 @@ export const auth = betterAuth({
     }),
   ],
 
-  // Trusted origins for CORS (add production domain when deployed)
-  trustedOrigins: [
-    siteConfig.url,
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-  ].filter(Boolean),
+  // Trusted origins for CORS — Better Auth auto-derives from request origin,
+  // so we only need to add explicit origins if we want to allow cross-origin
+  // auth (e.g., for separate frontend domains). For same-domain deployments
+  // (Vercel + custom domain pointing to same Vercel app), this can be empty.
+  trustedOrigins: [],
 
   // Secret for JWT signing (loaded from env)
   secret: process.env.BETTER_AUTH_SECRET,
